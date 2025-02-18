@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path, { join } from 'path'
-
+import initIpcMain from './services'
 // 确保路径正确
 const ROOT = join(__dirname, '../../..')  // 修改这里，向上三级到项目根目录
 const DIST_RENDERER = join(ROOT, 'dist/src/renderer')  // 从根目录进入dist/renderer
@@ -37,25 +37,7 @@ function createWindow() {
   // 添加窗口拖动功能
   mainWindow.setMenuBarVisibility(false) // 隐藏菜单栏
 
-  // 添加在createWindow函数之后
-  ipcMain.handle('window-minimize', () => {
-    console.log('window-minimize')
-    mainWindow?.minimize()
-  })
-
-  ipcMain.handle('window-maximize', () => {
-    if (mainWindow?.isMaximized()) {
-      mainWindow.unmaximize()
-      mainWindow.webContents.send('window-unmaximized')
-    } else {
-      mainWindow?.maximize()
-      mainWindow?.webContents.send('window-maximized')
-    }
-  })
-
-  ipcMain.handle('window-close', () => {
-    mainWindow?.close()
-  })
+  initIpcMain(mainWindow)
 }
 
 app.whenReady().then(createWindow)

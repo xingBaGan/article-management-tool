@@ -2,41 +2,12 @@ import { useState, useEffect } from 'react';
 import { FolderList } from './components/FolderList';
 import { ArticleList } from './components/ArticleList';
 import { ArticleViewer } from './components/ArticleViewer';
-import { DropZone } from './components/DropZone';
 import { SettingsModal } from './components/SettingsModal';
 import { Settings, Minus, Square, X, CopyIcon } from 'lucide-react';
-import { Article, Folder } from './types';
-
-// Mock data for demonstration
-const initialFolders: Folder[] = [
-  {
-    id: '1',
-    name: 'Technical Articles',
-    articles: [
-      {
-        id: '1',
-        title: 'Getting Started with React',
-        content: 'React is a popular JavaScript library for building user interfaces...',
-      },
-      {
-        id: '2',
-        title: 'TypeScript Best Practices',
-        content: 'TypeScript adds static typing to JavaScript, making it easier to write and maintain large applications...',
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Blog Posts',
-    articles: [
-      {
-        id: '3',
-        title: 'My First Blog Post',
-        content: 'Welcome to my blog! In this post, we will explore...',
-      },
-    ],
-  },
-];
+import { ArticleProvider, useArticle } from './contexts/ArticleContext';
+import { SettingsProvider, useSettings } from './contexts/SettingsContext';
+import { useDragAndDrop } from './hooks/useDragAndDrop';
+import { generateFileId } from '../../packages/utils';
 
 // 添加CSS属性类型
 const dragStyle = {
@@ -47,12 +18,33 @@ const noDragStyle = {
   WebkitAppRegion: 'no-drag'
 } as React.CSSProperties;
 
-export function App() {
-  const [folders, setFolders] = useState<Folder[]>(initialFolders);
-  const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+function AppContent() {
+  const {
+    folders,
+    setFolders,
+    selectedFolder,
+    setSelectedFolder,
+    selectedArticle,
+    setSelectedArticle,
+  } = useArticle();
+  const { isSettingsOpen, setIsSettingsOpen } = useSettings();
   const [isMaximized, setIsMaximized] = useState(false);
+
+  // 处理文件拖放
+  const { isDragging, dragHandlers } = useDragAndDrop({
+    onDrop: async (files) => {
+      const folder = files[0].path
+      const folderName = files[0].name
+      console.log('Dropped files:', files);
+      const result = await window.electron?.readDirectoryFiles(folder)
+      console.log('result:', result);
+      setFolders([...folders, {
+        id: await generateFileId(folder, folderName),
+        name: folderName,
+        articles: result.data
+      }])
+    },
+  });
 
   // 添加最大化状态监听
   useEffect(() => {
@@ -68,48 +60,47 @@ export function App() {
     };
   }, []);
 
-  const handleFolderDrop = (folderEntries: any[]) => {
-    // In a real implementation, we would process the folder contents here
-    console.log('Processing dropped folder:', folderEntries);
-  };
 
   return (
-    <div className="h-screen flex flex-col">
+    <div
+      className="h-screen flex flex-col"
+      {...dragHandlers}
+    >
       {/* 自定义标题栏 */}
-      <div 
-        className="h-8 flex items-center bg-gray-100 justify-between px-4 select-none" 
+      <div
+        className="h-8 flex items-center bg-gray-300 justify-between px-4 select-none"
         style={dragStyle}
         onDoubleClick={() => window.electron?.maximize()}
       >
-        <div className="text-gray-500 text">Article Publisher</div>
+        <div className="text-gray-700 text-bold">Article Publisher</div>
         <div className="flex items-center space-x-2" style={noDragStyle}>
-          <button 
-            onClick={() => window.electron?.minimize()} 
-            className="p-1 hover:bg-gray-700 rounded"
+          <button
+            onClick={() => window.electron?.minimize()}
+            className="p-1 hover:bg-gray-500 rounded"
           >
-            <Minus className="w-4 h-4 text-gray-300" />
+            <Minus className="w-4 h-4 text-gray-700" />
           </button>
-          <button 
-            onClick={() => window.electron?.maximize()} 
-            className="p-1 hover:bg-gray-700 rounded"
+          <button
+            onClick={() => window.electron?.maximize()}
+            className="p-1 hover:bg-gray-500 rounded"
           >
             {isMaximized ? (
-              <CopyIcon className="w-4 h-4 text-gray-300" />
+              <CopyIcon className="w-4 h-4 text-gray-700" />
             ) : (
-              <Square className="w-4 h-4 text-gray-300" />
+              <Square className="w-4 h-4 text-gray-700" />
             )}
           </button>
-          <button 
-            onClick={() => window.electron?.close()} 
+          <button
+            onClick={() => window.electron?.close()}
             className="p-1 hover:bg-red-500 rounded"
           >
-            <X className="w-4 h-4 text-gray-300" />
+            <X className="w-4 h-4 text-gray-700" />
           </button>
         </div>
       </div>
 
       {/* 主内容区域 */}
-      <div className="flex-1 flex relative">
+      <div className="flex-1 flex relative h-[calc(100vh-32px)]">
         <FolderList
           folders={folders}
           selectedFolder={selectedFolder}
@@ -121,7 +112,6 @@ export function App() {
           onSelectArticle={setSelectedArticle}
         />
         <ArticleViewer article={selectedArticle} />
-        <DropZone onFolderDrop={handleFolderDrop} />
 
         <button
           onClick={() => setIsSettingsOpen(true)}
@@ -134,8 +124,32 @@ export function App() {
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
         />
+
+        {/* 拖拽遮罩层 */}
+        {isDragging && (
+          <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+              <div className="text-2xl font-bold text-gray-700 mb-2">
+                松开以导入文件
+              </div>
+              <p className="text-gray-500">
+                支持导入 Markdown 文件或文件夹
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <ArticleProvider>
+      <SettingsProvider>
+        <AppContent />
+      </SettingsProvider>
+    </ArticleProvider>
   );
 }
 

@@ -7,6 +7,7 @@ interface ElectronAPI {
   onUnmaximize: (callback: () => void) => void
   removeMaximize: (callback: () => void) => void
   removeUnmaximize: (callback: () => void) => void
+  readDirectoryFiles: (dirPath: string) => Promise<{ success: boolean, data: FileInfo[] }>
 }
 
 declare interface Window {

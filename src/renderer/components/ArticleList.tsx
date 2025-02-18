@@ -12,14 +12,14 @@ interface ArticleListProps {
 export function ArticleList({ folder, selectedArticle, onSelectArticle }: ArticleListProps) {
   if (!folder) {
     return (
-      <div className="h-full w-72 bg-white p-4 border-r border-gray-200 flex items-center justify-center text-gray-500">
+      <div className="h-full w-72 bg-white p-4 border-r border-gray-200 flex items-center justify-center text-gray-500 overflow-y-auto">
         Select a folder to view articles
       </div>
     );
   }
 
   return (
-    <div className="h-full w-72 bg-white p-4 border-r border-gray-200">
+    <div className="h-full w-72 bg-white p-4 border-r border-gray-200 overflow-y-auto">
       <h2 className="text-lg font-semibold mb-4">Articles</h2>
       <div className="space-y-2">
         {folder.articles.map((article) => (
