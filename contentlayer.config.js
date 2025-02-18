@@ -16,10 +16,11 @@ import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
 import mermaid from 'remark-mermaidjs'
 import emoji from 'remark-emoji'
-import { join } from 'path'
 import { siteMetadata } from './scripts/siteMetadata'
+import { paths } from './scripts/paths'
 
-const contentDirPath = join(app.getPath('userData'), 'content')
+// 使用配置的内容目录路径
+const contentDirPath = paths.content
 
 const computedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
@@ -124,9 +125,9 @@ export const Authors = defineDocumentType(() => ({
   },
   computedFields,
 }))
-
+console.log('contentDirPath', contentDirPath)
 export default makeSource({
-  contentDirPath: contentDirPath, // 替换为您的内容目录
+  contentDirPath: contentDirPath,
   documentTypes: [Post, Article, Authors],
   mdx: {
     cwd: process.cwd(),
@@ -147,5 +148,11 @@ export default makeSource({
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
       rehypePresetMinify,
     ],
+  },
+  onSuccess: async (result) => {
+    console.log('Content layer build successful!')
+  },
+  onError: async (error) => {
+    console.error('Content layer build failed:', error)
   },
 });
