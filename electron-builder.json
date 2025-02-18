@@ -1,0 +1,22 @@
+{
+  "appId": "com.article.publisher",
+  "productName": "Article Publisher",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/electron/**/*",
+    "dist/renderer/**/*"
+  ],
+  "mac": {
+    "target": ["dmg", "zip"],
+    "category": "public.app-category.productivity"
+  },
+  "win": {
+    "target": ["nsis", "zip"]
+  },
+  "linux": {
+    "target": ["AppImage", "deb"],
+    "category": "Office"
+  }
+} 
