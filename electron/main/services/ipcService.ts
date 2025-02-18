@@ -1,11 +1,11 @@
-import { ipcMain, dialog } from "electron"
+import { ipcMain, dialog, app } from "electron"
 import type { BrowserWindow } from "electron"
-import { readTextFiles } from "./fileService"
-import type { FileInfo } from "../../../packages/types"
+import { readFoldsData, readTextFiles, saveFoldsJsonData } from "./fileService"
+import type { Folder } from "../../../packages/types"
+import { join } from "path"
 function initIpcMain(mainWindow: BrowserWindow) {
   // 添加在createWindow函数之后
   ipcMain.handle('window-minimize', () => {
-    console.log('window-minimize')
     mainWindow?.minimize()
   })
 
@@ -58,6 +58,17 @@ function initIpcMain(mainWindow: BrowserWindow) {
     } catch (error) {
       return { success: false, error: (error as Error).message }
     }
+  })
+
+  // save folders
+  ipcMain.handle('save-folders', async (_, folders: Folder[]) => {
+    await saveFoldsJsonData(folders, join(app.getPath('userData'), 'files.json'))
+  })
+
+  // load articles
+  ipcMain.handle('get-articles', async () => {
+    const folders = await readFoldsData()
+    return folders
   })
 }
 

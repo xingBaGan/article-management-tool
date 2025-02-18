@@ -1,3 +1,5 @@
+import { Folder } from "../../packages/types"
+
 const { contextBridge, ipcRenderer } = require('electron')
 // 在这里定义你需要暴露给渲染进程的API
 const api = {
@@ -5,13 +7,25 @@ const api = {
   minimize: () => ipcRenderer.invoke('window-minimize'),
   maximize: () => ipcRenderer.invoke('window-maximize'),
   close: () => ipcRenderer.invoke('window-close'),
+  getArticles: () => ipcRenderer.invoke('get-articles'),
   onMaximize: (callback: () => void) => ipcRenderer.on('window-maximized', callback),
   onUnmaximize: (callback: () => void) => ipcRenderer.on('window-unmaximized', callback),
   removeMaximize: (callback: () => void) => ipcRenderer.removeListener('window-maximized', callback),
   removeUnmaximize: (callback: () => void) => ipcRenderer.removeListener('window-unmaximized', callback),
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   readDirectoryFiles: (dirPath: string) => ipcRenderer.invoke('read-directory-files', dirPath),
+  saveFoldsJsonData: (folders: Folder[]) => ipcRenderer.invoke('save-folders', folders),
 }
 
 // 使用contextBridge暴露API给渲染进程
-contextBridge.exposeInMainWorld('electron', api)
+contextBridge.exposeInMainWorld('electron', {
+  ...api,
+  ipcRenderer: {
+    on: (channel: string, func: (...args: any[]) => void) => {
+      ipcRenderer.on(channel, (...args: any[]) => func(...args))
+    },
+    removeAllListeners: (channel: string) => {
+      ipcRenderer.removeAllListeners(channel)
+    }
+  }
+})

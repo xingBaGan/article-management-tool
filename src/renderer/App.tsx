@@ -4,10 +4,11 @@ import { ArticleList } from './components/ArticleList';
 import { ArticleViewer } from './components/ArticleViewer';
 import { SettingsModal } from './components/SettingsModal';
 import { Settings, Minus, Square, X, CopyIcon } from 'lucide-react';
-import { ArticleProvider, useArticle } from './contexts/ArticleContext';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
 import { generateFileId } from '../../packages/utils';
+import { ArticleProvider, useArticle } from './contexts/ArticleContext';
+import { join } from 'path';
 
 // 添加CSS属性类型
 const dragStyle = {
@@ -37,12 +38,19 @@ function AppContent() {
       const folderName = files[0].name
       console.log('Dropped files:', files);
       const result = await window.electron?.readDirectoryFiles(folder)
-      console.log('result:', result);
-      setFolders([...folders, {
-        id: await generateFileId(folder, folderName),
+      const id = await generateFileId(folder, folderName)
+      const exists = folders.some(f => f.id === id)
+      if (exists) {
+        return
+      }
+      const newFolder = [...folders, {
+        id: id,
         name: folderName,
         articles: result.data
-      }])
+      }]
+      
+      setFolders(newFolder)
+      window.electron?.saveFoldsJsonData(newFolder)
     },
   });
 

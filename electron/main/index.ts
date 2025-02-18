@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path, { join } from 'path'
 import initIpcMain from './services'
+
 // 确保路径正确
 const ROOT = join(__dirname, '../../..')  // 修改这里，向上三级到项目根目录
 const DIST_RENDERER = join(ROOT, 'dist/src/renderer')  // 从根目录进入dist/renderer
@@ -11,7 +12,7 @@ process.env.PUBLIC = app.isPackaged ? DIST_RENDERER : join(ROOT, 'public')
 
 let mainWindow: BrowserWindow | null = null
 
-function createWindow() {
+async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -52,4 +53,4 @@ app.on('activate', () => {
   if (mainWindow === null && app.isPackaged) {
     createWindow()
   }
-}) 
+})

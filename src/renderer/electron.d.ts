@@ -8,6 +8,8 @@ interface ElectronAPI {
   removeMaximize: (callback: () => void) => void
   removeUnmaximize: (callback: () => void) => void
   readDirectoryFiles: (dirPath: string) => Promise<{ success: boolean, data: FileInfo[] }>
+  saveFoldsJsonData: (folders: Folder[]) => Promise<void>
+  getArticles: () => Promise<Folder[]>
 }
 
 declare interface Window {

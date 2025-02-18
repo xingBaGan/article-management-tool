@@ -6,26 +6,36 @@ import clsx from 'clsx';
 interface ArticleListProps {
   folder: Folder | null;
   selectedArticle: Article | null;
-  onSelectArticle: (article: Article) => void;
+  onSelectArticle: (article: Article | null) => void;
 }
 
 export function ArticleList({ folder, selectedArticle, onSelectArticle }: ArticleListProps) {
+  const handleClick = () => {
+    onSelectArticle(null)
+  }
+
   if (!folder) {
     return (
+      <div className="h-full w-72 bg-white p-4 border-r border-gray-200 overflow-hidden" onClick={handleClick}>
+        <h2 className="text-lg font-semibold mb-4">Articles</h2>
       <div className="h-full w-72 bg-white p-4 border-r border-gray-200 flex items-center justify-center text-gray-500 overflow-y-auto">
         Select a folder to view articles
+      </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full w-72 bg-white p-4 border-r border-gray-200 overflow-y-auto">
+    <div className="h-full w-72 bg-white p-4 border-r border-gray-200 overflow-y-auto" onClick={handleClick}>
       <h2 className="text-lg font-semibold mb-4">Articles</h2>
       <div className="space-y-2">
         {folder.articles.map((article) => (
           <button
             key={article.id}
-            onClick={() => onSelectArticle(article)}
+            onClick={(e) => {
+              onSelectArticle(article)
+              e.stopPropagation()
+            }}
             className={clsx(
               "w-full flex items-center space-x-2 p-2 rounded-lg transition-colors",
               selectedArticle?.id === article.id

@@ -1,8 +1,11 @@
-import { readdir, readFile } from 'fs/promises'
+import { copyFile, mkdir, readdir, readFile } from 'fs/promises'
 import { join, extname } from 'path'
-import { FileInfo } from '../../../packages/types'
+import { Article, FileInfo } from '../../../packages/types'
 import { generateFileId } from '../../../packages/utils'
-
+import { existsSync } from 'fs'
+import { writeFile } from 'fs/promises'
+import { app } from 'electron'
+import { Folder } from '../../../packages/types'
 // 支持的文件类型
 const SUPPORTED_EXTENSIONS = ['.md', '.mdx', '.txt']
 
@@ -28,12 +31,26 @@ export async function readTextFiles(dirPath: string): Promise<FileInfo[]> {
           try {
             const content = await readFile(fullPath, 'utf-8')
             const id = await generateFileId(fullPath, entry.name)
+            let newPath = join(app.getPath('userData'), 'content', entry.name)
+            if (existsSync(newPath)) {
+              const newName = `${entry.name}${Date.now()}${ext}`
+              newPath = join(app.getPath('userData'), 'content', newName)
+            }
             files.push({
               id,
               path: fullPath,
               title: entry.name,
-              content
+              content,
+              newPath
             })
+            // copy file to content folder
+            const contentDirPath = join(app.getPath('userData'), 'content')
+            console.log('contentDirPath', contentDirPath)
+            if (!existsSync(contentDirPath)) {
+              await mkdir(contentDirPath, { recursive: true })
+            }
+            const contentFilePath = join(contentDirPath, entry.name)
+            await copyFile(fullPath, contentFilePath)
           } catch (error) {
             console.error(`Error reading file ${fullPath}:`, error)
           }
@@ -47,3 +64,50 @@ export async function readTextFiles(dirPath: string): Promise<FileInfo[]> {
 
   return files
 } 
+
+
+export async function saveFoldsJsonData(folders: Folder[], outputPath: string): Promise<void> {
+  try {
+    // Remove the 'content' field from each file object
+    const filesWithoutContent = folders.map(folder => ({
+      ...folder,
+      articles: folder?.articles?.map(article => ({
+        ...article,
+        content: ''
+      }))
+    }))
+    // Convert the array to JSON
+    const jsonData = JSON.stringify(filesWithoutContent, null, 2)
+    // Write the JSON data to the specified output path
+    await writeFile(outputPath, jsonData, 'utf-8')
+  } catch (error) {
+    console.error(`Error saving files to JSON:`, error)
+  }
+}
+
+export async function getArticleContent(article: Article): Promise<string> {
+  const filePath = article.newPath
+  const content = await readFile(filePath, 'utf-8')
+  return content
+}
+
+export async function readFoldsData(): Promise<Folder[]> {
+  const filePath = join(app.getPath('userData'), 'files.json')
+  try {
+    // Read the JSON file
+    const data = await readFile(filePath, 'utf-8')
+    // Parse the JSON data
+    const folds: Folder[] = JSON.parse(data)
+    const folders = await Promise.all(folds.map(async (fold) => ({
+      ...fold,
+      articles: await Promise.all(fold.articles.map(async (article) => ({
+        ...article,
+        content: await getArticleContent(article)
+      })))
+    })))
+    return folders
+  } catch (error) {
+    console.error(`Error reading folds data from ${filePath}:`, error)
+    return []
+  }
+}
