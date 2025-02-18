@@ -1,13 +1,11 @@
 import { defineDocumentType, makeSource } from 'contentlayer/source-files';
 import readingTime from 'reading-time'
-import siteMetadata from './siteMetadata';
 import {
   remarkExtractFrontmatter,
   remarkCodeTitles,
   remarkImgToJsx,
   extractTocHeadings,
 } from 'pliny/mdx-plugins/index.js'
-import settings from './data.json'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeSlug from 'rehype-slug'
@@ -18,6 +16,10 @@ import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
 import mermaid from 'remark-mermaidjs'
 import emoji from 'remark-emoji'
+import { join } from 'path'
+import { siteMetadata } from './scripts/siteMetadata'
+
+const contentDirPath = join(app.getPath('userData'), 'content')
 
 const computedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
@@ -124,7 +126,7 @@ export const Authors = defineDocumentType(() => ({
 }))
 
 export default makeSource({
-  contentDirPath: settings.publishDir, // 替换为您的内容目录
+  contentDirPath: contentDirPath, // 替换为您的内容目录
   documentTypes: [Post, Article, Authors],
   mdx: {
     cwd: process.cwd(),
@@ -141,7 +143,7 @@ export default makeSource({
       rehypeSlug,
       rehypeAutolinkHeadings,
       rehypeKatex,
-      [rehypeCitation, { path: settings.publishDir }],
+      [rehypeCitation, { path: contentDirPath }],
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
       rehypePresetMinify,
     ],
