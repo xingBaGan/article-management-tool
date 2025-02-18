@@ -19,7 +19,7 @@ function createWindow() {
     titleBarStyle: 'hidden', // 隐藏标题栏
     webPreferences: {
       contextIsolation: true,
-      nodeIntegration: false,
+      // nodeIntegration: false,
       preload: join(__dirname, '../preload/index.js')
     }
   })
@@ -27,6 +27,9 @@ function createWindow() {
   // 开发环境下加载本地服务
   if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    mainWindow.webContents.openDevTools({
+      mode: 'detach'
+    })
   } else {
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
   }
@@ -35,11 +38,12 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false) // 隐藏菜单栏
 
   // 添加在createWindow函数之后
-  ipcMain.on('window-minimize', () => {
+  ipcMain.handle('window-minimize', () => {
+    console.log('window-minimize')
     mainWindow?.minimize()
   })
 
-  ipcMain.on('window-maximize', () => {
+  ipcMain.handle('window-maximize', () => {
     if (mainWindow?.isMaximized()) {
       mainWindow.unmaximize()
       mainWindow.webContents.send('window-unmaximized')
@@ -49,18 +53,8 @@ function createWindow() {
     }
   })
 
-  ipcMain.on('window-close', () => {
+  ipcMain.handle('window-close', () => {
     mainWindow?.close()
-  })
-
-  // 监听窗口最大化事件
-  mainWindow.on('maximize', () => {
-    mainWindow?.webContents.send('window-maximized')
-  })
-
-  // 监听窗口还原事件
-  mainWindow.on('unmaximize', () => {
-    mainWindow?.webContents.send('window-unmaximized')
   })
 }
 
