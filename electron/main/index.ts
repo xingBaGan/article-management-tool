@@ -1,9 +1,9 @@
-import { app, BrowserWindow } from 'electron'
-import { join } from 'path'
+import { app, BrowserWindow, ipcMain } from 'electron'
+import path, { join } from 'path'
 
 // 确保路径正确
 const ROOT = join(__dirname, '../../..')  // 修改这里，向上三级到项目根目录
-const DIST_RENDERER = join(ROOT, 'dist/renderer')  // 从根目录进入dist/renderer
+const DIST_RENDERER = join(ROOT, 'dist/src/renderer')  // 从根目录进入dist/renderer
 
 // 设置环境变量
 process.env.DIST_RENDERER = DIST_RENDERER
@@ -15,6 +15,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    frame: false, // 移除标题栏和边框
+    titleBarStyle: 'hidden', // 隐藏标题栏
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -23,17 +25,43 @@ function createWindow() {
   })
 
   // 开发环境下加载本地服务
-  if (!app.isPackaged && process.env.VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
-    mainWindow.webContents.openDevTools({
-      mode: 'detach'
-    })
+  if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    // 生产环境下加载打包后的文件
-    const indexHtml = join(DIST_RENDERER, 'index.html')
-    console.log('Loading:', indexHtml)  // 添加日志以便调试
-    mainWindow.loadFile(indexHtml)
+    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
   }
+
+  // 添加窗口拖动功能
+  mainWindow.setMenuBarVisibility(false) // 隐藏菜单栏
+
+  // 添加在createWindow函数之后
+  ipcMain.on('window-minimize', () => {
+    mainWindow?.minimize()
+  })
+
+  ipcMain.on('window-maximize', () => {
+    if (mainWindow?.isMaximized()) {
+      mainWindow.unmaximize()
+      mainWindow.webContents.send('window-unmaximized')
+    } else {
+      mainWindow?.maximize()
+      mainWindow?.webContents.send('window-maximized')
+    }
+  })
+
+  ipcMain.on('window-close', () => {
+    mainWindow?.close()
+  })
+
+  // 监听窗口最大化事件
+  mainWindow.on('maximize', () => {
+    mainWindow?.webContents.send('window-maximized')
+  })
+
+  // 监听窗口还原事件
+  mainWindow.on('unmaximize', () => {
+    mainWindow?.webContents.send('window-unmaximized')
+  })
 }
 
 app.whenReady().then(createWindow)

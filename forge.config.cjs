@@ -1,3 +1,5 @@
+const { resolve } = require('path');
+
 module.exports = {
   packagerConfig: {
     asar: true,
@@ -15,19 +17,6 @@ module.exports = {
     {
       name: '@electron-forge/maker-dmg',
       config: {},
-    },
-  ],
-  plugins: [
-    {
-      name: '@electron-forge/plugin-vite',
-      config: {
-        build: [
-          {
-            entry: 'electron/main/index.ts',
-            config: 'electron.vite.config.ts',
-          },
-        ],
-      },
     },
   ],
 }; 

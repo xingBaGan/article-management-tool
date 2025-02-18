@@ -10,7 +10,8 @@ export default defineConfig({
         input: {
           index: resolve(__dirname, 'electron/main/index.ts')
         }
-      }
+      },
+      watch: {}
     }
   },
   preload: {
@@ -20,25 +21,20 @@ export default defineConfig({
         input: {
           index: resolve(__dirname, 'electron/preload/index.ts')
         }
-      }
+      },
+      watch: {}
     }
   },
   renderer: {
     root: '.',
-    publicDir: 'public',
     build: {
-      outDir: 'dist/renderer',
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'index.html')
         }
-      }
+      },
+      watch: {}
     },
-    plugins: [react()],
-    resolve: {
-      alias: [
-        { find: '@', replacement: resolve(__dirname, 'src/renderer') }
-      ]
-    }
+    plugins: [react()]
   }
 }) 
