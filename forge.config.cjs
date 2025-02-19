@@ -2,7 +2,7 @@ const { resolve } = require('path');
 
 module.exports = {
   packagerConfig: {
-    asar: true,
+    asar: false
   },
   rebuildConfig: {},
   makers: [

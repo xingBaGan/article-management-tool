@@ -9,7 +9,11 @@ export default defineConfig({
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'electron/main/index.ts')
-        }
+        },
+        external: [
+          'electron',
+          ...Object.keys(require('./package.json').dependencies || {})
+        ]
       },
       watch: {}
     }
@@ -21,6 +25,10 @@ export default defineConfig({
         input: {
           index: resolve(__dirname, 'electron/preload/index.ts')
         },
+        external: [
+          'electron',
+          ...Object.keys(require('./package.json').dependencies || {})
+        ],
         output: {
           format: 'cjs',
           entryFileNames: '[name].js'
@@ -35,9 +43,18 @@ export default defineConfig({
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'index.html')
-        }
+        },
+        external: ['@mdx-js/mdx', '@types/estree', '@types/estree-jsx']
       },
       watch: {}
+    },
+    resolve: {
+      alias: {
+        '@mdx-js/mdx': resolve(__dirname, 'node_modules/@mdx-js/mdx'),
+        '@types/estree': resolve(__dirname, 'node_modules/@types/estree'),
+        '@types/estree-jsx': resolve(__dirname, 'node_modules/@types/estree-jsx'),
+        '@types/mdx': resolve(__dirname, 'node_modules/@types/mdx')
+      }
     },
     plugins: [react()]
   }
