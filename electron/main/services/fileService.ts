@@ -11,6 +11,9 @@ import { Document } from '../../../packages/types'
 import fs from 'fs/promises'
 // 支持的文件类型
 const SUPPORTED_EXTENSIONS = ['.md', '.mdx', '.txt']
+const initialSettings = {
+  repoUrl: ''
+}
 
 export async function readTextFiles(dirPath: string): Promise<FileInfo[]> {
   const files: FileInfo[] = []
@@ -103,6 +106,9 @@ export async function getContentLayer(ArticleInfo: ArticleInfo): Promise<Documen
 export async function readFoldsData(): Promise<Folder[]> {
   const filePath = join(app.getPath('userData'), 'files.json')
   try {
+    if (!existsSync(filePath)) {
+      await writeFile(filePath, JSON.stringify(initialSettings), 'utf-8')
+    }
     // Read the JSON file
     const data = await readFile(filePath, 'utf-8')
     // Parse the JSON data
@@ -142,4 +148,28 @@ export async function deleteArticle(folderId: string, articleId: string): Promis
   } catch (error) {
     console.error(`Error deleting article ${articleId}:`, error)
   }
+}
+
+export async function getSettings(): Promise<any> {
+  const settingsPath = join(app.getPath('userData'), 'settings.json');
+  try {
+    const data = await fs.readFile(settingsPath, 'utf-8');
+    const settings = JSON.parse(data);
+    return settings;
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+      // File does not exist, create a new one with default settings
+      const defaultSettings = {};
+      await fs.writeFile(settingsPath, JSON.stringify(defaultSettings, null, 2));
+      return defaultSettings;
+    } else {
+      console.error(`Error reading settings from ${settingsPath}:`, error);
+      throw error;
+    }
+  }
+}
+
+export async function saveSettings(settings: any): Promise<void> {
+  const settingsPath = join(app.getPath('userData'), 'settings.json');
+  await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2));
 }

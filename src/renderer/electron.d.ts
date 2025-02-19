@@ -15,6 +15,8 @@ interface ElectronAPI {
   buildContentLayer: () => Promise<any>
   deleteArticle: (folderId: string, articleId: string) => Promise<void>
   deleteFolder: (folderId: string) => Promise<void>
+  getSettings: () => Promise<any>
+  saveSettings: (settings: any) => Promise<void>
   ipcRenderer: {
     on: (channel: string, callback: (...args: any[]) => void) => void
     removeAllListeners: (channel: string) => void

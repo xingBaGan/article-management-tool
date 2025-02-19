@@ -1,6 +1,6 @@
 import { ipcMain, dialog, app } from "electron"
 import type { BrowserWindow } from "electron"
-import { readFoldsData, readTextFiles, saveFoldsJsonData } from "./fileService"
+import { getSettings, readFoldsData, readTextFiles, saveFoldsJsonData, saveSettings } from "./fileService"
 import type { ArticleInfo, Folder } from "../../../packages/types"
 import { join } from "path"
 import { getDocuments, buildContentLayer } from "./contentLayerService"
@@ -138,6 +138,15 @@ function initIpcMain(mainWindow: BrowserWindow) {
       return { success: false, error };
     }
   });
+
+  ipcMain.handle('get-settings', async () => {
+    const settings = await getSettings()
+    return settings
+  })
+
+  ipcMain.handle('save-settings', async (_, settings: any) => {
+    await saveSettings(settings)
+  })
 }
 
 export default initIpcMain

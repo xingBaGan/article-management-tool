@@ -19,6 +19,8 @@ const api = {
   buildContentLayer: () => ipcRenderer.invoke('build-content-layer'),
   deleteArticle: (folderId: string, articleId: string) => ipcRenderer.invoke('delete-article', folderId, articleId),
   deleteFolder: (folderId: string) => ipcRenderer.invoke('delete-folder', folderId),
+  getSettings: () => ipcRenderer.invoke('get-settings'),
+  saveSettings: (settings: any) => ipcRenderer.invoke('save-settings', settings),
 }
 
 // 使用contextBridge暴露API给渲染进程
