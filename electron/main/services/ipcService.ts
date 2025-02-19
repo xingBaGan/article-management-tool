@@ -5,6 +5,7 @@ import type { ArticleInfo, Folder } from "../../../packages/types"
 import { join } from "path"
 import { getDocuments, buildContentLayer } from "./contentLayerService"
 import fs from "fs/promises"
+import { initRepo, pushRepo } from './gitService'
 
 function initIpcMain(mainWindow: BrowserWindow) {
   // 添加在createWindow函数之后
@@ -147,6 +148,14 @@ function initIpcMain(mainWindow: BrowserWindow) {
   ipcMain.handle('save-settings', async (_, settings: any) => {
     await saveSettings(settings)
   })
+
+  ipcMain.handle('init-repo', async (_, repoUrl: string) => {
+    return await initRepo(repoUrl);
+  });
+
+  ipcMain.handle('push-repo', async () => {
+    return await pushRepo();
+  });
 }
 
 export default initIpcMain

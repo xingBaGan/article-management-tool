@@ -21,6 +21,8 @@ const api = {
   deleteFolder: (folderId: string) => ipcRenderer.invoke('delete-folder', folderId),
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: any) => ipcRenderer.invoke('save-settings', settings),
+  initRepo: (repoUrl: string) => ipcRenderer.invoke('init-repo', repoUrl),
+  pushRepo: () => ipcRenderer.invoke('push-repo'),
 }
 
 // 使用contextBridge暴露API给渲染进程

@@ -17,4 +17,3 @@ export async function buildContentLayer() {
     console.error('buildContentLayer----', error)
   }
 }
-

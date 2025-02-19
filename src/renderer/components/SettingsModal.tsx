@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, GitBranch, Upload } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,7 +9,8 @@ interface SettingsModalProps {
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [repoUrl, setRepoUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-
+  const [isInitializing, setIsInitializing] = useState(false);
+  const [isPushing, setIsPushing] = useState(false);
   useEffect(() => {
     // 加载已保存的设置
     window.electron?.getSettings().then((settings: any) => {
@@ -29,6 +30,28 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       // 这里可以添加错误提示
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleInitRepo = async () => {
+    try {
+      setIsInitializing(true);
+      await window.electron?.initRepo(repoUrl);
+    } catch (error) {
+      console.error('Failed to initialize repository:', error);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
+  const handlePushRepo = async () => {
+    try {
+      setIsPushing(true);
+      await window.electron?.pushRepo();
+    } catch (error) {
+      console.error('Failed to push repository:', error);
+    } finally {
+      setIsPushing(false);
     }
   };
 
@@ -60,7 +83,27 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-sm font-medium text-gray-900">Git Repository</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-900">Git Repository</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleInitRepo}
+                  disabled={isInitializing || !repoUrl}
+                  className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Initialize Repository"
+                >
+                  <GitBranch className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handlePushRepo}
+                  disabled={isPushing || !repoUrl}
+                  className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Push Changes"
+                >
+                  <Upload className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
             <input
               type="text"
               placeholder="Enter repository URL"
