@@ -13,6 +13,12 @@ interface ElectronAPI {
   removeMaximize: (callback: () => void) => void
   removeUnmaximize: (callback: () => void) => void
   buildContentLayer: () => Promise<any>
+  deleteArticle: (folderId: string, articleId: string) => Promise<void>
+  deleteFolder: (folderId: string) => Promise<void>
+  ipcRenderer: {
+    on: (channel: string, callback: (...args: any[]) => void) => void
+    removeAllListeners: (channel: string) => void
+  }
 }
 
 declare global {

@@ -23,6 +23,21 @@ export function ArticleProvider({ children }: { children: ReactNode }) {
     };
     fetchFolders();
   }, []);
+
+  useEffect(() => {
+    window.electron?.ipcRenderer.on('reload-articles', async () => {
+      const folders = await window.electron?.getArticles();
+      console.log('folders----', folders)
+      setFolders([...(folders || [])])
+      setSelectedFolder( fd =>{
+        const folder = folders?.find(f=>f.id === fd?.id)
+        return folder || null
+      })
+    })
+    return () => {
+      window.electron?.ipcRenderer.removeAllListeners('reload-articles')
+    }
+  }, [])
   
   return (
     <ArticleContext.Provider

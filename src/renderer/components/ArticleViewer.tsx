@@ -14,7 +14,7 @@ export function ArticleViewer({ article }: ArticleViewerProps) {
     );
   }
   const post = article.contentLayer;
-  console.log(article.contentLayer?.body)
+
   const content = post?.body?.html || article.content;
   
   return (

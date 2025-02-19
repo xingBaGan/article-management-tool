@@ -1,9 +1,11 @@
 import { ipcMain, dialog, app } from "electron"
 import type { BrowserWindow } from "electron"
 import { readFoldsData, readTextFiles, saveFoldsJsonData } from "./fileService"
-import type { Folder } from "../../../packages/types"
+import type { ArticleInfo, Folder } from "../../../packages/types"
 import { join } from "path"
 import { getDocuments, buildContentLayer } from "./contentLayerService"
+import fs from "fs/promises"
+
 function initIpcMain(mainWindow: BrowserWindow) {
   // 添加在createWindow函数之后
   ipcMain.handle('window-minimize', () => {
@@ -83,6 +85,59 @@ function initIpcMain(mainWindow: BrowserWindow) {
     const result = await buildContentLayer()
     return result
   })
+
+  // delete article
+  ipcMain.handle('delete-article', async (_, folderId: string, articleId: string) => {
+    try {
+      // 获取文件夹数据
+      const foldersData = await readFoldsData();
+      const folder = foldersData.find((f: Folder) => f.id === folderId);
+      
+      if (folder) {
+        // 找到要删除的文章
+        const article = folder.articles.find((a: ArticleInfo) => a.id === articleId);
+        if (article && article.newPath) {
+          // 删除物理文件
+          await fs.unlink(article.newPath);
+          
+          // 更新文件夹数据
+          folder.articles = folder.articles.filter((a: ArticleInfo) => a.id !== articleId);
+          await saveFoldsJsonData(foldersData, join(app.getPath('userData'), 'files.json'));
+          mainWindow?.webContents.send('reload-articles')
+          return { success: true };
+        }
+      }
+      return { success: false, error: 'Article not found' };
+    } catch (error) {
+      return { success: false, error };
+    }
+  });
+
+  // delete folder
+  ipcMain.handle('delete-folder', async (_, folderId: string) => {
+    try {
+      const foldersData = await readFoldsData();
+      const folder = foldersData.find((f: Folder) => f.id === folderId);
+      
+      if (folder) {
+        // 删除文件夹下的所有文件
+        for (const article of folder.articles) {
+          if (article.newPath) {
+            await fs.unlink(article.newPath);
+          }
+        }
+        
+        // 更新文件夹数据
+        const updatedFolders = foldersData.filter((f: Folder) => f.id !== folderId);
+        await saveFoldsJsonData(updatedFolders, join(app.getPath('userData'), 'files.json'));
+        mainWindow?.webContents.send('reload-articles');
+        return { success: true };
+      }
+      return { success: false, error: 'Folder not found' };
+    } catch (error) {
+      return { success: false, error };
+    }
+  });
 }
 
 export default initIpcMain

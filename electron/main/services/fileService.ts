@@ -8,6 +8,7 @@ import { app } from 'electron'
 import { Folder } from '../../../packages/types'
 import { getDocuments } from './contentLayerService'
 import { Document } from '../../../packages/types'
+import fs from 'fs/promises'
 // 支持的文件类型
 const SUPPORTED_EXTENSIONS = ['.md', '.mdx', '.txt']
 
@@ -118,5 +119,27 @@ export async function readFoldsData(): Promise<Folder[]> {
   } catch (error) {
     console.error(`Error reading folds data from ${filePath}:`, error)
     return []
+  }
+}
+
+export async function deleteArticle(folderId: string, articleId: string): Promise<void> {
+  try {
+    const foldersData = await readFoldsData();
+    const folder = foldersData.find((f: Folder) => f.id === folderId);
+
+    if (folder) {
+      // 找到要删除的文章
+      const article = folder.articles.find((a: ArticleInfo) => a.id === articleId);
+      if (article && article.newPath) {
+        // 删除物理文件
+        await fs.unlink(article.newPath);
+
+        // 更新文件夹数据
+        folder.articles = folder.articles.filter((a: ArticleInfo) => a.id !== articleId);
+        await saveFoldsJsonData(foldersData, join(app.getPath('userData'), 'files.json'));
+      }
+    }
+  } catch (error) {
+    console.error(`Error deleting article ${articleId}:`, error)
   }
 }

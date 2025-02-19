@@ -54,14 +54,6 @@ function AppContent() {
     },
   });
 
-  useEffect(() => {
-    const fetchDocuments = async () => {
-      const documents = await window.electron?.getDocuments()
-      console.log(documents)
-    }
-    fetchDocuments()
-  }, [])
-
   // 添加最大化状态监听
   useEffect(() => {
     const handleMaximize = () => setIsMaximized(true);
@@ -129,7 +121,8 @@ function AppContent() {
         <FolderList
           folders={folders}
           selectedFolder={selectedFolder}
-          onSelectFolder={setSelectedFolder}
+          setSelectFolder={setSelectedFolder}
+          setSelectedArticle={setSelectedArticle}
         />
         <ArticleList
           folder={selectedFolder}
