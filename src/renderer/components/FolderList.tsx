@@ -1,6 +1,6 @@
 import React from 'react';
 import { Folder as FolderIcon } from 'lucide-react';
-import { Folder } from '../types';
+import { Folder } from '../../../packages/types';
 import clsx from 'clsx';
 
 interface FolderListProps {

@@ -12,6 +12,7 @@ interface ElectronAPI {
   onUnmaximize: (callback: () => void) => void
   removeMaximize: (callback: () => void) => void
   removeUnmaximize: (callback: () => void) => void
+  buildContentLayer: () => Promise<any>
 }
 
 declare global {

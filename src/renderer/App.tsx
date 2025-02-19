@@ -3,7 +3,7 @@ import { FolderList } from './components/FolderList';
 import { ArticleList } from './components/ArticleList';
 import { ArticleViewer } from './components/ArticleViewer';
 import { SettingsModal } from './components/SettingsModal';
-import { Settings, Minus, Square, X, CopyIcon } from 'lucide-react';
+import { Settings, Minus, Square, X, CopyIcon, Cog } from 'lucide-react';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
 import { generateFileId } from '../../packages/utils';
@@ -29,6 +29,7 @@ function AppContent() {
   } = useArticle();
   const { isSettingsOpen, setIsSettingsOpen } = useSettings();
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isBuilding, setIsBuilding] = useState(false);
 
   // 处理文件拖放
   const { isDragging, dragHandlers } = useDragAndDrop({
@@ -75,6 +76,15 @@ function AppContent() {
     };
   }, []);
 
+  // 添加构建处理函数
+  const handleBuild = async () => {
+    setIsBuilding(true);
+    try {
+      await window.electron?.buildContentLayer();
+    } finally {
+      setIsBuilding(false);
+    }
+  };
 
   return (
     <div
@@ -134,6 +144,13 @@ function AppContent() {
         >
           <Settings className="w-5 h-5 text-gray-700" />
         </button>
+        <button
+          onClick={handleBuild}
+          disabled={isBuilding}
+          className="absolute bottom-4 left-14 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-50"
+        >
+          <Cog className={`w-5 h-5 text-gray-700 ${isBuilding ? 'animate-spin' : ''}`} />
+        </button>
 
         <SettingsModal
           isOpen={isSettingsOpen}
@@ -150,6 +167,16 @@ function AppContent() {
               <p className="text-gray-500">
                 支持导入 Markdown 文件或文件夹
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* 添加构建中的遮罩层 */}
+        {isBuilding && (
+          <div className="absolute inset-0 bg-gray-900/30 flex items-center justify-center z-50">
+            <div className="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-2">
+              <Cog className="w-5 h-5 animate-spin" />
+              <span>Building...</span>
             </div>
           </div>
         )}

@@ -15,7 +15,7 @@ export function ArticleViewer({ article }: ArticleViewerProps) {
   }
   const post = article.contentLayer;
   console.log(article.contentLayer?.body)
-  const content = post?.body?.raw || article.content;
+  const content = post?.body?.html || article.content;
   
   return (
     <div className="h-full flex-1 p-6 overflow-auto">
@@ -24,7 +24,7 @@ export function ArticleViewer({ article }: ArticleViewerProps) {
         {post?.body?.code ? (
           <MDXLayoutRenderer code={post?.body?.code} toc={post?.toc} />
         ) : (
-          <div dangerouslySetInnerHTML={{ __html: content.html }}></div>
+          <div dangerouslySetInnerHTML={{ __html: content }}></div>
         )}
       </div>
     </div>

@@ -3,7 +3,7 @@ import type { BrowserWindow } from "electron"
 import { readFoldsData, readTextFiles, saveFoldsJsonData } from "./fileService"
 import type { Folder } from "../../../packages/types"
 import { join } from "path"
-import { getDocuments } from "./contentLayerService"
+import { getDocuments, buildContentLayer } from "./contentLayerService"
 function initIpcMain(mainWindow: BrowserWindow) {
   // 添加在createWindow函数之后
   ipcMain.handle('window-minimize', () => {
@@ -76,6 +76,12 @@ function initIpcMain(mainWindow: BrowserWindow) {
   ipcMain.handle('get-documents', async () => {
     const documents = await getDocuments()
     return documents
+  })
+
+  // build content layer
+  ipcMain.handle('build-content-layer', async () => {
+    const result = await buildContentLayer()
+    return result
   })
 }
 

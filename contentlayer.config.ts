@@ -107,7 +107,7 @@ export const Article = defineDocumentType(() => ({
 }))
 
 export default makeSource({
-  contentDirPath: 'C:\\Users\\jacobj\\AppData\\Roaming\\article-management-tool\\content',
+  contentDirPath: contentDirPath,
   documentTypes: [Post, Article],
   mdx: {
     cwd: process.cwd(),

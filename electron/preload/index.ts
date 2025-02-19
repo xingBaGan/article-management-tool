@@ -16,6 +16,7 @@ const api = {
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   readDirectoryFiles: (dirPath: string) => ipcRenderer.invoke('read-directory-files', dirPath),
   saveFoldsJsonData: (folders: Folder[]) => ipcRenderer.invoke('save-folders', folders),
+  buildContentLayer: () => ipcRenderer.invoke('build-content-layer'),
 }
 
 // 使用contextBridge暴露API给渲染进程
