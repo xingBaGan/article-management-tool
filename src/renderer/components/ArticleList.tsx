@@ -1,12 +1,12 @@
 import React from 'react';
 import { FileText } from 'lucide-react';
-import { Article, Folder } from '../types';
+import { ArticleInfo, Folder } from '../../../packages/types';
 import clsx from 'clsx';
 
 interface ArticleListProps {
   folder: Folder | null;
-  selectedArticle: Article | null;
-  onSelectArticle: (article: Article | null) => void;
+  selectedArticle: ArticleInfo | null;
+  onSelectArticle: (article: ArticleInfo | null) => void;
 }
 
 export function ArticleList({ folder, selectedArticle, onSelectArticle }: ArticleListProps) {

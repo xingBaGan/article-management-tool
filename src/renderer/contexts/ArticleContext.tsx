@@ -1,13 +1,13 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Article, Folder } from '../types';
+import { ArticleInfo, Folder } from '../../../packages/types';
 
 interface ArticleContextType {
   folders: Folder[];
   setFolders: (folders: Folder[]) => void;
   selectedFolder: Folder | null;
   setSelectedFolder: (folder: Folder | null) => void;
-  selectedArticle: Article | null;
-  setSelectedArticle: (article: Article | null) => void;
+  selectedArticle: ArticleInfo | null;
+  setSelectedArticle: (article: ArticleInfo | null) => void;
 }
 
 const ArticleContext = createContext<ArticleContextType | undefined>(undefined);
@@ -15,14 +15,15 @@ const ArticleContext = createContext<ArticleContextType | undefined>(undefined);
 export function ArticleProvider({ children }: { children: ReactNode }) {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<ArticleInfo | null>(null);
   useEffect(() => {
     const fetchFolders = async () => {
       const folders = await window.electron?.getArticles();
-      setFolders(folders);
+      setFolders(folders || []);
     };
     fetchFolders();
   }, []);
+  
   return (
     <ArticleContext.Provider
       value={{

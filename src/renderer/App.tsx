@@ -8,7 +8,6 @@ import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
 import { generateFileId } from '../../packages/utils';
 import { ArticleProvider, useArticle } from './contexts/ArticleContext';
-import { join } from 'path';
 
 // 添加CSS属性类型
 const dragStyle = {
@@ -53,6 +52,14 @@ function AppContent() {
       window.electron?.saveFoldsJsonData(newFolder)
     },
   });
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      const documents = await window.electron?.getDocuments()
+      console.log(documents)
+    }
+    fetchDocuments()
+  }, [])
 
   // 添加最大化状态监听
   useEffect(() => {

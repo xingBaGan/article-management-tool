@@ -1,3 +1,5 @@
+import { DocumentTypes, Article } from '../../.contentlayer/generated/types'
+
 export interface FileInfo {
   id: string
   path: string
@@ -6,15 +8,20 @@ export interface FileInfo {
   newPath: string
 } 
 
-export interface Article {
+export interface ArticleInfo {
   id: string;
   title: string;
   content: string;
   newPath: string;
+  builded: boolean;
+  contentLayer?: Document;
 }
 
 export interface Folder {
   id: string;
   name: string;
-  articles: Article[];
+  articles: ArticleInfo[];
 }
+
+export type Document = DocumentTypes
+export type { Article }

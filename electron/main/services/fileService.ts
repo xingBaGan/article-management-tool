@@ -1,11 +1,13 @@
 import { copyFile, mkdir, readdir, readFile } from 'fs/promises'
 import { join, extname } from 'path'
-import { Article, FileInfo } from '../../../packages/types'
+import { ArticleInfo, FileInfo } from '../../../packages/types'
 import { generateFileId } from '../../../packages/utils'
 import { existsSync } from 'fs'
 import { writeFile } from 'fs/promises'
 import { app } from 'electron'
 import { Folder } from '../../../packages/types'
+import { getDocuments } from './contentLayerService'
+import { Document } from '../../../packages/types'
 // 支持的文件类型
 const SUPPORTED_EXTENSIONS = ['.md', '.mdx', '.txt']
 
@@ -71,8 +73,8 @@ export async function saveFoldsJsonData(folders: Folder[], outputPath: string): 
     // Remove the 'content' field from each file object
     const filesWithoutContent = folders.map(folder => ({
       ...folder,
-      articles: folder?.articles?.map(article => ({
-        ...article,
+      articles: folder?.articles?.map(ArticleInfo => ({
+        ...ArticleInfo,
         content: ''
       }))
     }))
@@ -85,10 +87,16 @@ export async function saveFoldsJsonData(folders: Folder[], outputPath: string): 
   }
 }
 
-export async function getArticleContent(article: Article): Promise<string> {
-  const filePath = article.newPath
+export async function getArticleContent(ArticleInfo: ArticleInfo): Promise<string> {
+  const filePath = ArticleInfo.newPath
   const content = await readFile(filePath, 'utf-8')
   return content
+}
+
+export async function getContentLayer(ArticleInfo: ArticleInfo): Promise<Document> {
+  const documents = await getDocuments()
+  const contentLayer = documents.find((document: Document) => document._id === ArticleInfo.title)
+  return contentLayer || {} as Document
 }
 
 export async function readFoldsData(): Promise<Folder[]> {
@@ -100,9 +108,10 @@ export async function readFoldsData(): Promise<Folder[]> {
     const folds: Folder[] = JSON.parse(data)
     const folders = await Promise.all(folds.map(async (fold) => ({
       ...fold,
-      articles: await Promise.all(fold.articles.map(async (article) => ({
-        ...article,
-        content: await getArticleContent(article)
+      articles: await Promise.all(fold.articles.map(async (ArticleInfo) => ({
+        ...ArticleInfo,
+        content: await getArticleContent(ArticleInfo),
+        contentLayer: await getContentLayer(ArticleInfo)
       })))
     })))
     return folders

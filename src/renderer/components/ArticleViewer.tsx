@@ -1,8 +1,8 @@
 import React from 'react';
-import { Article } from '../types';
-
+import { MDXLayoutRenderer } from 'pliny/src/mdx-components';
+import { ArticleInfo } from '../../../packages/types';
 interface ArticleViewerProps {
-  article: Article | null;
+  article: ArticleInfo | null;
 }
 
 export function ArticleViewer({ article }: ArticleViewerProps) {
@@ -13,12 +13,19 @@ export function ArticleViewer({ article }: ArticleViewerProps) {
       </div>
     );
   }
-
+  const post = article.contentLayer;
+  console.log(article.contentLayer?.body)
+  const content = post?.body?.raw || article.content;
+  
   return (
     <div className="h-full flex-1 p-6 overflow-auto">
       <h1 className="text-2xl font-bold mb-4">{article.title}</h1>
       <div className="prose max-w-none">
-        {article.content}
+        {post?.body?.code ? (
+          <MDXLayoutRenderer code={post?.body?.code} toc={post?.toc} />
+        ) : (
+          <div dangerouslySetInnerHTML={{ __html: content.html }}></div>
+        )}
       </div>
     </div>
   );

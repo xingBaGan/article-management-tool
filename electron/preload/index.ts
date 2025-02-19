@@ -8,6 +8,7 @@ const api = {
   maximize: () => ipcRenderer.invoke('window-maximize'),
   close: () => ipcRenderer.invoke('window-close'),
   getArticles: () => ipcRenderer.invoke('get-articles'),
+  getDocuments: () => ipcRenderer.invoke('get-documents'),
   onMaximize: (callback: () => void) => ipcRenderer.on('window-maximized', callback),
   onUnmaximize: (callback: () => void) => ipcRenderer.on('window-unmaximized', callback),
   removeMaximize: (callback: () => void) => ipcRenderer.removeListener('window-maximized', callback),

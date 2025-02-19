@@ -10,17 +10,22 @@
     "lint": "eslint .",
     "preview": "electron-vite preview",
     "start": "electron-vite preview",
-    "rebuild": "pnpm rebuild"
+    "rebuild": "pnpm rebuild",
+    "build:contentlayer": "contentlayer2 build",
+    "install:playwright": "npx playwright install --with-deps chromium"
   },
   "dependencies": {
+    "@mdx-js/esbuild": "^3.1.0",
+    "clsx": "^2.1.0",
+    "contentlayer": "^0.3.4",
+    "contentlayer2": "latest",
     "lucide-react": "^0.344.0",
+    "next-contentlayer": "^0.3.4",
+    "playwright": "^1.50.1",
+    "pliny": "0.1.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
-    "clsx": "^2.1.0",
-    "contentlayer": "^0.3.4",
-    "next-contentlayer": "^0.3.4",
-    "pliny": "^0.1.7",
     "reading-time": "^1.5.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-citation": "^2.0.0",
@@ -31,7 +36,8 @@
     "remark-emoji": "^4.0.1",
     "remark-gfm": "^4.0.0",
     "remark-math": "^6.0.0",
-    "remark-mermaidjs": "^6.0.0"
+    "remark-mermaidjs": "^6.0.0",
+    "@mdx-js/react": "^3.0.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.2.0",
@@ -61,7 +67,10 @@
   },
   "pnpm": {
     "peerDependencyRules": {
-      "ignoreMissing": ["react", "react-dom"]
+      "ignoreMissing": [
+        "react",
+        "react-dom"
+      ]
     },
     "onlyBuiltDependencies": [
       "electron",

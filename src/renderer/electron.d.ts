@@ -1,5 +1,10 @@
+import { Folder } from '../../packages/types'
+
 interface ElectronAPI {
-  versions: NodeJS.ProcessVersions
+  getArticles: () => Promise<Folder[]>
+  readDirectoryFiles: (path: string) => Promise<any>
+  saveFoldsJsonData: (data: any) => Promise<void>
+  getDocuments: () => Promise<any>
   minimize: () => void
   maximize: () => void
   close: () => void
@@ -7,11 +12,12 @@ interface ElectronAPI {
   onUnmaximize: (callback: () => void) => void
   removeMaximize: (callback: () => void) => void
   removeUnmaximize: (callback: () => void) => void
-  readDirectoryFiles: (dirPath: string) => Promise<{ success: boolean, data: FileInfo[] }>
-  saveFoldsJsonData: (folders: Folder[]) => Promise<void>
-  getArticles: () => Promise<Folder[]>
 }
 
-declare interface Window {
-  electron: ElectronAPI
-} 
+declare global {
+  interface Window {
+    electron?: ElectronAPI
+  }
+}
+
+export {} 
