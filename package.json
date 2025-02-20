@@ -4,23 +4,21 @@
   "version": "0.0.0",
   "description": "一个将本地markdown文件发布到各个平台的工具",
   "author": "jacob jiang",
-  "main": "out/main/index.js",
+  "type": "module",
+  "main": "out/electron/main/index.js",
   "scripts": {
-    "clean": "rimraf out/",
-    "dev": "electron-vite dev --watch",
-    "build": "npm run build:main && npm run build:preload && npm run build:renderer",
-    "build:main": "tsc -p electron/tsconfig.json",
-    "build:preload": "tsc -p electron/tsconfig.json",
+    "clean": "rimraf out/ dist/",
+    "dev": "npm run build && electron-vite dev --watch",
+    "build": "npm run clean && npm run build:main && npm run build:preload && npm run build:renderer",
+    "build:main": "tsc -p electron/tsconfig.json && tsc-alias -p electron/tsconfig.json",
+    "build:preload": "tsc -p electron/tsconfig.json && tsc-alias -p electron/tsconfig.json",
     "build:renderer": "vite build",
-    "build:win": "npm run build && electron-builder --win",
-    "build:mac": "npm run build && electron-builder --mac",
-    "build:linux": "npm run build && electron-builder --linux",
-    "package": "npm run clean && electron-vite build && electron-forge package",
-    "make": "npm run clean && electron-vite build && electron-forge make",
+    "build:win": "npm run build && electron-builder --win --dir",
+    "build:mac": "npm run build && electron-builder --mac --dir",
+    "build:linux": "npm run build && electron-builder --linux --dir",
     "lint": "eslint .",
     "preview": "electron-vite preview",
     "start": "electron-vite preview",
-    "rebuild": "npm run clean && electron-vite build && electron-forge make",
     "build:contentlayer": "contentlayer2 build",
     "install:playwright": "npx playwright install --with-deps chromium"
   },
@@ -58,12 +56,7 @@
     "source-map": "^0.7.4"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.2.0",
-    "@electron-forge/maker-deb": "^7.7.0",
     "@electron-forge/maker-dmg": "^7.2.0",
-    "@electron-forge/maker-rpm": "^7.7.0",
-    "@electron-forge/maker-squirrel": "^7.2.0",
-    "@electron-forge/maker-zip": "^7.2.0",
     "@electron-forge/plugin-fuses": "^7.2.0",
     "@electron-forge/plugin-vite": "^7.2.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
@@ -79,6 +72,7 @@
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
     "electron": "^28.0.0",
+    "electron-builder": "^24.13.3",
     "electron-vite": "^2.0.0",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
@@ -87,10 +81,10 @@
     "postcss": "^8.4.35",
     "rimraf": "^5.0.10",
     "tailwindcss": "^3.4.1",
+    "tsc-alias": "^1.8.10",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
-    "vite": "^5.0.0",
-    "electron-builder": "^24.9.1"
+    "vite": "^5.0.0"
   },
   "pnpm": {
     "peerDependencyRules": {
@@ -113,13 +107,32 @@
   "build": {
     "appId": "com.article.publisher",
     "productName": "Article Publisher",
+    "icon": "public/icon.png",
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "assets"
     },
     "files": [
       "out/**/*",
-      "!**/*.map"
+      "dist/**/*",
+      "public/**/*",
+      "package.json",
+      ".contentlayer/**/*",
+      "contentlayer.config.js"
     ],
+    "extraResources": [
+      {
+        "from": ".contentlayer",
+        "to": ".contentlayer",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "extraMetadata": {
+      "main": "out/electron/main/index.js"
+    },
+    "asar": true,
     "win": {
       "target": [
         "nsis"

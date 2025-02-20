@@ -1,21 +1,13 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
-import path, { join } from 'path'
-import initIpcMain from './services'
+import { app, BrowserWindow } from 'electron'
+import { join } from 'path'
+import initIpcMain from './services/index.js'
 
-// The built directory structure
-//
-// ├─┬ dist
-// │ ├─┬ main
-// │ │ └── index.js    > compiled main code
-// │ ├─┬ preload
-// │ │ └── index.js    > compiled preload code
-// │ └─┬ renderer
-// │   └── index.html  > compiled renderer code
 
-// 设置环境变量
+// Update path configurations for production
+const isDev = !app.isPackaged
 process.env.DIST_ELECTRON = join(__dirname, '..')
-process.env.DIST = join(process.env.DIST_ELECTRON, '../renderer')
-process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST_ELECTRON, '../public')
+process.env.DIST = isDev ? join(process.env.DIST_ELECTRON, '../dist') : join(process.env.DIST_ELECTRON, '../dist')
+process.env.PUBLIC = isDev ? join(process.env.DIST_ELECTRON, '../public') : join(process.env.DIST_ELECTRON, '../public')
 
 let mainWindow: BrowserWindow | null = null
 
@@ -28,19 +20,17 @@ async function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: true,
-      preload: join(__dirname, '../preload/index.js')
+      preload: join(__dirname, '../preload/index.mjs')
     }
   })
 
-  // 开发环境下加载本地服务
-  if (!app.isPackaged) {
+  if (isDev) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173')
     mainWindow.webContents.openDevTools()
   } else {
     mainWindow.loadFile(join(process.env.DIST!, 'index.html'))
   }
 
-  mainWindow.setMenuBarVisibility(false)
   initIpcMain(mainWindow)
 }
 
@@ -53,7 +43,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-  if (mainWindow === null && app.isPackaged) {
+  if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
   }
 })

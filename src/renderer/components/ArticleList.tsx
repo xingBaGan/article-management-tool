@@ -17,7 +17,6 @@ export function ArticleList({ folder, selectedArticle, onSelectArticle }: Articl
     articleId: string;
   }>({ show: false, x: 0, y: 0, articleId: '' });
   const articles = folder?.articles || []
-  console.log('articles', articles)
 
   const handleClick = () => {
     onSelectArticle(null)

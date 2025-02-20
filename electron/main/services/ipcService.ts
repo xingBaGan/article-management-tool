@@ -9,9 +9,7 @@ import { initRepo, pushRepo } from './gitService'
 
 function initIpcMain(mainWindow: BrowserWindow) {
   // 将 项目 data 下的书，拷贝到 userData  content目录下
-  const dataDir = join(__dirname, '../../../data')
-  const contentDir = join(app.getPath('userData'), 'content')
-  fs.cp(dataDir, contentDir, { recursive: true })
+  
   // 添加在createWindow函数之后
   ipcMain.handle('window-minimize', () => {
     mainWindow?.minimize()

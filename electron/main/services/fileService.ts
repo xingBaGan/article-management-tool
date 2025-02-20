@@ -1,14 +1,12 @@
-import { copyFile, mkdir, readdir, readFile } from 'fs/promises'
+import fs, { copyFile, mkdir, readdir, readFile, writeFile } from 'fs/promises'
 import { join, extname } from 'path'
 import { ArticleInfo, FileInfo } from '../../../packages/types'
 import { generateFileId } from '../../../packages/utils'
-import { existsSync } from 'fs'
-import { writeFile } from 'fs/promises'
 import { app } from 'electron'
 import { Folder } from '../../../packages/types'
 import { getDocuments } from './contentLayerService'
-import { Document } from '../../../packages/types'
-import fs from 'fs/promises'
+import { DocumentTypes as Document } from '../../../packages/types'
+import { existsSync } from 'fs'
 // 支持的文件类型
 const SUPPORTED_EXTENSIONS = ['.md', '.mdx', '.txt']
 const initialSettings = {
@@ -100,7 +98,7 @@ export async function getArticleContent(ArticleInfo: ArticleInfo): Promise<strin
 export async function getContentLayer(ArticleInfo: ArticleInfo): Promise<Document> {
   const documents = await getDocuments()
   const contentLayer = documents.find((document: Document) => document._id === ArticleInfo.title)
-  return contentLayer || {} as Document
+  return contentLayer!
 }
 
 export async function readFoldsData(): Promise<Folder[]> {
@@ -121,7 +119,8 @@ export async function readFoldsData(): Promise<Folder[]> {
         contentLayer: await getContentLayer(ArticleInfo)
       })))
     })))
-    return folders
+    // @ts-ignore
+    return folders;
   } catch (error) {
     console.error(`Error reading folds data from ${filePath}:`, error)
     return []
@@ -153,7 +152,7 @@ export async function deleteArticle(folderId: string, articleId: string): Promis
 export async function getSettings(): Promise<any> {
   const settingsPath = join(app.getPath('userData'), 'settings.json');
   try {
-    const data = await fs.readFile(settingsPath, 'utf-8');
+    const data = await readFile(settingsPath, 'utf-8');
     const settings = JSON.parse(data);
     return settings;
   } catch (error) {
