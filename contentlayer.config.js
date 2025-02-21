@@ -22,20 +22,19 @@ import { paths } from './scripts/paths'
 const contentDirPath = paths.content
 const computedFields = {
   slug: {
-    type: 'string' as const,
+    type: 'string',
     resolve: (doc) => doc._raw.flattenedPath.replace(/^.+?(\/)/, ''),
   },
   path: {
-    type: 'string' as const,
+    type: 'string',
     resolve: (doc) => doc._raw.flattenedPath,
   },
   filePath: {
-    type: 'string' as const,
+    type: 'string',
     resolve: (doc) => doc._raw.sourceFilePath,
   },
-  toc: { type: 'string' as const, resolve: (doc) => extractTocHeadings(doc.body.raw) },
+  toc: { type: 'string', resolve: (doc) => extractTocHeadings(doc.body.raw) },
 }
-
 
 const Post = defineDocumentType(() => ({
   name: 'Post',

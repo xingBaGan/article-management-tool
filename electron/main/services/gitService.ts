@@ -2,13 +2,13 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs/promises';
-
+import { logger } from './logService';
 const execAsync = promisify(exec);
 
 export async function initRepo(repoUrl: string) {
   try {
     const buildDir = path.join(process.cwd(), '.contentlayer');
-    console.log('buildDir', buildDir)
+    logger.info('buildDir', buildDir)
     // 检查目录是否存在，不存在则创建
     await fs.mkdir(buildDir, { recursive: true });
     

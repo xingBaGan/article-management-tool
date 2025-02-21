@@ -1,10 +1,28 @@
 import { Folder } from '../../packages/types'
 
+interface IpcRenderer {
+  on(channel: string, func: (...args: unknown[]) => void): void;
+  removeAllListeners(channel: string): void;
+}
+
+interface FileData {
+  path: string;
+  content: string;
+}
+
+interface Settings {
+  repoUrl?: string;
+  theme?: string;
+  // 其他设置属性
+}
+
 interface ElectronAPI {
-  getArticles: () => Promise<Folder[]>
-  readDirectoryFiles: (path: string) => Promise<any>
-  saveFoldsJsonData: (data: any) => Promise<void>
-  getDocuments: () => Promise<any>
+  versions: NodeJS.ProcessVersions;
+  ipcRenderer: IpcRenderer;
+  getArticles: () => Promise<Folder[]>;
+  readDirectoryFiles: (path: string) => Promise<FileData[]>;
+  saveFoldsJsonData: (data: Folder[]) => Promise<void>;
+  getDocuments: () => Promise<Document[]>;
   minimize: () => void
   maximize: () => void
   close: () => void
@@ -15,20 +33,16 @@ interface ElectronAPI {
   buildContentLayer: () => Promise<any>
   deleteArticle: (folderId: string, articleId: string) => Promise<void>
   deleteFolder: (folderId: string) => Promise<void>
-  getSettings: () => Promise<any>
-  saveSettings: (settings: any) => Promise<void>
+  getSettings: () => Promise<Settings>
+  saveSettings: (settings: Settings) => Promise<void>
   initContentLayer: () => Promise<any>
   initRepo: (repoUrl: string) => Promise<any>
   pushRepo: () => Promise<any>
-  ipcRenderer: {
-    on: (channel: string, callback: (...args: any[]) => void) => void
-    removeAllListeners: (channel: string) => void
-  }
 }
 
 declare global {
   interface Window {
-    electron?: ElectronAPI
+    electron: ElectronAPI;
   }
 }
 

@@ -3,6 +3,7 @@ import { exec } from 'child_process'
 import { join } from 'path'
 import { app } from 'electron'
 import { access } from 'fs/promises'
+import { logger } from './logService'
 
 const isDev = !app.isPackaged
 const relativePath = isDev
@@ -11,16 +12,13 @@ const relativePath = isDev
 const contentLayerPath = isDev
   ? join(__dirname, relativePath)
   : join(process.resourcesPath, relativePath)
-console.log('contentLayerPath', contentLayerPath)
 
 // 获取所有文档
 function getAllDoucment() {
+  logger.info('contentLayerPath', contentLayerPath)
   const allPosts = require(`${contentLayerPath}/Post/_index.json`)
   const allArticles = require(`${contentLayerPath}/Article/_index.json`)
   const allAuthors = require(`${contentLayerPath}/Authors/_index.json`)
-  console.log('allPosts', allPosts)
-  console.log('allArticles', allArticles)
-  console.log('allAuthors', allAuthors)
   return [...allPosts, ...allArticles, ...allAuthors]
 }
 
@@ -31,15 +29,15 @@ export async function getDocuments(): Promise<Document[]> {
     try {
       await access(contentLayerPath)
     } catch (error) {
-      console.log('Content layer not generated yet, building...')
-      await buildContentLayer()
+      logger.info('Content layer not generated yet')
     }
+
 
     // Use dynamic import instead of require
     const allDocuments = getAllDoucment()
     return allDocuments
   } catch (error) {
-    console.error('Error loading documents:', error)
+    logger.error('Error loading documents:', error)
     return []
   }
 }
@@ -61,9 +59,10 @@ export async function buildContentLayer() {
         resolve({ stdout, stderr })
       })
     })
-    console.log('Content layer built successfully')
+    logger.info('result', result)
+    logger.info('Content layer built successfully')
   } catch (error) {
-    console.error('buildContentLayer error:', error)
+    logger.error('buildContentLayer error:', error)
     throw error
   }
 }

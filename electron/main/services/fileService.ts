@@ -49,7 +49,6 @@ export async function readTextFiles(dirPath: string): Promise<FileInfo[]> {
             })
             // copy file to content folder
             const contentDirPath = join(app.getPath('userData'), 'content')
-            console.log('contentDirPath', contentDirPath)
             if (!existsSync(contentDirPath)) {
               await mkdir(contentDirPath, { recursive: true })
             }
@@ -105,15 +104,18 @@ export async function readFoldsData(): Promise<Folder[]> {
   const filePath = join(app.getPath('userData'), 'files.json')
   try {
     if (!existsSync(filePath)) {
-      await writeFile(filePath, JSON.stringify(initialSettings), 'utf-8')
+      await writeFile(filePath, JSON.stringify([]), 'utf-8')
     }
     // Read the JSON file
     const data = await readFile(filePath, 'utf-8')
     // Parse the JSON data
     const folds: Folder[] = JSON.parse(data)
-    const folders = await Promise.all(folds.map(async (fold) => ({
+    if (folds.length === 0) {
+      return []
+    }
+    const folders = await Promise.all(folds?.map(async (fold) => ({
       ...fold,
-      articles: await Promise.all(fold.articles.map(async (ArticleInfo) => ({
+      articles: await Promise.all(fold?.articles?.map(async (ArticleInfo) => ({
         ...ArticleInfo,
         content: await getArticleContent(ArticleInfo),
         contentLayer: await getContentLayer(ArticleInfo)
@@ -149,7 +151,7 @@ export async function deleteArticle(folderId: string, articleId: string): Promis
   }
 }
 
-export async function getSettings(): Promise<any> {
+export async function getSettings(): Promise<Record<string, any>> {
   const settingsPath = join(app.getPath('userData'), 'settings.json');
   try {
     const data = await readFile(settingsPath, 'utf-8');

@@ -1,6 +1,18 @@
+import { contextBridge, ipcRenderer } from 'electron'
 import { Folder } from "../../packages/types"
 
-const { contextBridge, ipcRenderer } = require('electron')
+interface Settings {
+  repoUrl?: string;
+  // 添加其他设置属性
+}
+
+// Add logging interface
+interface LogMessage {
+  level: 'info' | 'error' | 'warn' | 'debug';
+  message: string;
+  meta?: any;
+}
+
 // 在这里定义你需要暴露给渲染进程的API
 const api = {
   versions: process.versions,
@@ -20,17 +32,28 @@ const api = {
   deleteArticle: (folderId: string, articleId: string) => ipcRenderer.invoke('delete-article', folderId, articleId),
   deleteFolder: (folderId: string) => ipcRenderer.invoke('delete-folder', folderId),
   getSettings: () => ipcRenderer.invoke('get-settings'),
-  saveSettings: (settings: any) => ipcRenderer.invoke('save-settings', settings),
+  saveSettings: (settings: Settings) => ipcRenderer.invoke('save-settings', settings),
   initRepo: (repoUrl: string) => ipcRenderer.invoke('init-repo', repoUrl),
   pushRepo: () => ipcRenderer.invoke('push-repo'),
+  // Add logging methods
+  log: {
+    info: (message: string, meta?: any) => 
+      ipcRenderer.invoke('log', { level: 'info', message, meta }),
+    error: (message: string, meta?: any) => 
+      ipcRenderer.invoke('log', { level: 'error', message, meta }),
+    warn: (message: string, meta?: any) => 
+      ipcRenderer.invoke('log', { level: 'warn', message, meta }),
+    debug: (message: string, meta?: any) => 
+      ipcRenderer.invoke('log', { level: 'debug', message, meta }),
+  }
 }
 
 // 使用contextBridge暴露API给渲染进程
 contextBridge.exposeInMainWorld('electron', {
   ...api,
   ipcRenderer: {
-    on: (channel: string, func: (...args: any[]) => void) => {
-      ipcRenderer.on(channel, (...args: any[]) => func(...args))
+    on: (channel: string, func: (...args: unknown[]) => void) => {
+      ipcRenderer.on(channel, (_event, ...args: unknown[]) => func(...args))
     },
     removeAllListeners: (channel: string) => {
       ipcRenderer.removeAllListeners(channel)

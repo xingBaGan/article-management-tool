@@ -21,8 +21,8 @@ const config = {
       ]
     },
     {
-      from: ".contentlayer",
-      to: ".contentlayer",
+      from: "contentlayer.config.js",
+      to: "contentlayer.config.js",
       filter: [
         "**/*"
       ]
