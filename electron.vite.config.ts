@@ -37,16 +37,19 @@ export default defineConfig({
     }
   },
   renderer: {
-    root: '.',
+    root: __dirname,
+    base: './',
     build: {
-      outDir: 'dist',
-      assetsDir: 'assets',
+      outDir: 'out/electron/renderer',
+      assetsDir: '',
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'index.html')
         }
-      }
+      },
+      emptyOutDir: true,
     },
+    publicDir: 'public',
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src')

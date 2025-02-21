@@ -2,12 +2,12 @@ import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
 import initIpcMain from './services/index.js'
 
-
-// Update path configurations for production
 const isDev = !app.isPackaged
-process.env.DIST_ELECTRON = join(__dirname, '..')
-process.env.DIST = isDev ? join(process.env.DIST_ELECTRON, '../dist') : join(process.env.DIST_ELECTRON, '../dist')
-process.env.PUBLIC = isDev ? join(process.env.DIST_ELECTRON, '../public') : join(process.env.DIST_ELECTRON, '../public')
+const getAssetPath = (...paths: string[]): string => {
+  return app.isPackaged
+    ? join(process.resourcesPath, 'app.asar', 'out/electron/renderer', ...paths)
+    : join(__dirname, '../renderer', ...paths)
+}
 
 let mainWindow: BrowserWindow | null = null
 
@@ -20,16 +20,20 @@ async function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: true,
-      preload: join(__dirname, '../preload/index.mjs')
+      preload: join(__dirname, '../preload/index.js'),
+      webSecurity: false
     }
   })
 
-  if (isDev) {
-    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173')
-    mainWindow.webContents.openDevTools()
+  if (process.env.ELECTRON_RENDERER_URL) {
+    await mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
   } else {
-    mainWindow.loadFile(join(process.env.DIST!, 'index.html'))
+    await mainWindow.loadFile(getAssetPath('index.html'))
   }
+
+  mainWindow.webContents.openDevTools({
+    mode: 'detach'
+  })
 
   initIpcMain(mainWindow)
 }

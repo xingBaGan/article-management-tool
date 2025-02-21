@@ -18,6 +18,9 @@ function getAllDoucment() {
   const allPosts = require(`${contentLayerPath}/Post/_index.json`)
   const allArticles = require(`${contentLayerPath}/Article/_index.json`)
   const allAuthors = require(`${contentLayerPath}/Authors/_index.json`)
+  console.log('allPosts', allPosts)
+  console.log('allArticles', allArticles)
+  console.log('allAuthors', allAuthors)
   return [...allPosts, ...allArticles, ...allAuthors]
 }
 

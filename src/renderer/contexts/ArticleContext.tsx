@@ -8,6 +8,7 @@ interface ArticleContextType {
   setSelectedFolder: (folder: Folder | null) => void;
   selectedArticle: ArticleInfo | null;
   setSelectedArticle: (article: ArticleInfo | null) => void;
+  fetchFolders: () => Promise<void>;
 }
 
 const ArticleContext = createContext<ArticleContextType | undefined>(undefined);
@@ -16,18 +17,17 @@ export function ArticleProvider({ children }: { children: ReactNode }) {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<ArticleInfo | null>(null);
+  const fetchFolders = async () => {
+    const folders = await window.electron?.getArticles();
+    setFolders(folders || []);
+  };
   useEffect(() => {
-    const fetchFolders = async () => {
-      const folders = await window.electron?.getArticles();
-      setFolders(folders || []);
-    };
     fetchFolders();
   }, []);
 
   useEffect(() => {
     window.electron?.ipcRenderer.on('reload-articles', async () => {
       const folders = await window.electron?.getArticles();
-      console.log('folders----', folders)
       setFolders([...(folders || [])])
       setSelectedFolder( fd =>{
         const folder = folders?.find(f=>f.id === fd?.id)
@@ -48,6 +48,7 @@ export function ArticleProvider({ children }: { children: ReactNode }) {
         setSelectedFolder,
         selectedArticle,
         setSelectedArticle,
+        fetchFolders,
       }}
     >
       {children}

@@ -4,18 +4,17 @@
   "version": "0.0.0",
   "description": "一个将本地markdown文件发布到各个平台的工具",
   "author": "jacob jiang",
-  "type": "module",
   "main": "out/electron/main/index.js",
   "scripts": {
     "clean": "rimraf out/ dist/",
     "dev": "npm run build && electron-vite dev --watch",
-    "build": "npm run clean && npm run build:main && npm run build:preload && npm run build:renderer",
+    "build": "npm run build:main && npm run build:preload && npm run build:renderer",
     "build:main": "tsc -p electron/tsconfig.json && tsc-alias -p electron/tsconfig.json",
     "build:preload": "tsc -p electron/tsconfig.json && tsc-alias -p electron/tsconfig.json",
     "build:renderer": "vite build",
-    "build:win": "npm run build && electron-builder --win --dir",
-    "build:mac": "npm run build && electron-builder --mac --dir",
-    "build:linux": "npm run build && electron-builder --linux --dir",
+    "build:win": "pnpm run build && pnpm electron-vite build && pnpm exec electron-builder --win",
+    "build:mac": "pnpm run build && pnpm electron-vite build && pnpm exec electron-builder --mac",
+    "build:linux": "pnpm run build && pnpm electron-vite build && pnpm exec electron-builder --linux",
     "lint": "eslint .",
     "preview": "electron-vite preview",
     "start": "electron-vite preview",
@@ -26,7 +25,6 @@
     "@mdx-js/esbuild": "^3.1.0",
     "astring": "^1.9.0",
     "clsx": "^2.1.0",
-    "contentlayer": "^0.3.4",
     "contentlayer2": "latest",
     "dequal": "^2.0.3",
     "devlop": "^1.1.0",
@@ -103,51 +101,5 @@
     "@types/estree": "^1.0.0",
     "@types/estree-jsx": "^1.0.0",
     "@mdx-js/mdx": "^2.0.0"
-  },
-  "build": {
-    "appId": "com.article.publisher",
-    "productName": "Article Publisher",
-    "icon": "public/icon.png",
-    "directories": {
-      "output": "dist",
-      "buildResources": "assets"
-    },
-    "files": [
-      "out/**/*",
-      "dist/**/*",
-      "public/**/*",
-      "package.json",
-      ".contentlayer/**/*",
-      "contentlayer.config.js"
-    ],
-    "extraResources": [
-      {
-        "from": ".contentlayer",
-        "to": ".contentlayer",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
-    "extraMetadata": {
-      "main": "out/electron/main/index.js"
-    },
-    "asar": true,
-    "win": {
-      "target": [
-        "nsis"
-      ]
-    },
-    "mac": {
-      "target": [
-        "dmg"
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    }
   }
 }

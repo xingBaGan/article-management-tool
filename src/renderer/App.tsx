@@ -26,6 +26,7 @@ function AppContent() {
     setSelectedFolder,
     selectedArticle,
     setSelectedArticle,
+    fetchFolders
   } = useArticle();
   const { isSettingsOpen, setIsSettingsOpen } = useSettings();
   const [isMaximized, setIsMaximized] = useState(false);
@@ -73,6 +74,9 @@ function AppContent() {
     setIsBuilding(true);
     try {
       await window.electron?.buildContentLayer();
+      await fetchFolders();
+      setSelectedFolder(null)
+      setSelectedArticle(null)
     } finally {
       setIsBuilding(false);
     }
