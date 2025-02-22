@@ -5,7 +5,7 @@ import type { ArticleInfo, Folder } from "../../../packages/types"
 import { join } from "path"
 import { getDocuments, buildContentLayer } from "./contentLayerService"
 import fs from "fs/promises"
-import { initRepo, pushRepo } from './gitService'
+import { getIsInitialed, initRepo, pushRepo } from './gitService'
 import { logger } from './logService'
 
 function initIpcMain(mainWindow: BrowserWindow) {
@@ -159,8 +159,12 @@ function initIpcMain(mainWindow: BrowserWindow) {
     return await initRepo(repoUrl);
   });
 
-  ipcMain.handle('push-repo', async () => {
-    return await pushRepo();
+  ipcMain.handle('push-repo', async (_, force: boolean = false) => {
+    return await pushRepo(force);
+  });
+
+  ipcMain.handle('get-is-initialed', async () => {
+    return await getIsInitialed();
   });
 
   // Add logging handler

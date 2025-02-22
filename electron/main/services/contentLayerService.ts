@@ -1,24 +1,28 @@
 import { DocumentTypes as Document } from '../../../packages/types'
 import { exec } from 'child_process'
-import { join } from 'path'
+import path, { join } from 'path'
 import { app } from 'electron'
 import { access } from 'fs/promises'
 import { logger } from './logService'
+import { getRootPath } from '../utils'
 
 const isDev = !app.isPackaged
-const relativePath = isDev
-  ? '../../../../article-publisher/.contentlayer/generated'
-  : '.contentlayer/generated'
+const relativePath = '.contentlayer/generated';
+
+logger.info('isDev', isDev)
+logger.info('process.resourcesPath', process.resourcesPath)
+logger.info('getRootPath', getRootPath())
 const contentLayerPath = isDev
-  ? join(__dirname, relativePath)
+  ? join(getRootPath(), relativePath)
   : join(process.resourcesPath, relativePath)
+
 
 // 获取所有文档
 function getAllDoucment() {
   logger.info('contentLayerPath', contentLayerPath)
-  const allPosts = require(`${contentLayerPath}/Post/_index.json`)
-  const allArticles = require(`${contentLayerPath}/Article/_index.json`)
-  const allAuthors = require(`${contentLayerPath}/Authors/_index.json`)
+  const allPosts = require(path.join(contentLayerPath, 'Post/_index.json'))
+  const allArticles = require(path.join(contentLayerPath, 'Article/_index.json'))
+  const allAuthors = require(path.join(contentLayerPath, 'Authors/_index.json'))
   return [...allPosts, ...allArticles, ...allAuthors]
 }
 
@@ -48,8 +52,8 @@ export async function buildContentLayer() {
     const result = await new Promise((resolve, reject) => {
       const isWin = process.platform === 'win32'
       const command = isWin ? 'npm.cmd' : 'npm'
-      
-      exec(`${command} run build:contentlayer`, {
+      const configPath = path.join(getRootPath(), 'contentlayer.config.js')
+      exec(`npx contentlayer2 build --config ${configPath}`, {
         cwd: app.isPackaged ? process.resourcesPath : process.cwd()
       }, (error, stdout, stderr) => {
         if (error) {

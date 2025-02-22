@@ -34,7 +34,8 @@ const api = {
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: Settings) => ipcRenderer.invoke('save-settings', settings),
   initRepo: (repoUrl: string) => ipcRenderer.invoke('init-repo', repoUrl),
-  pushRepo: () => ipcRenderer.invoke('push-repo'),
+  pushRepo: (force: boolean = false) => ipcRenderer.invoke('push-repo', force),
+  getIsInitialed: () => ipcRenderer.invoke('get-is-initialed'),
   // Add logging methods
   log: {
     info: (message: string, meta?: any) => 

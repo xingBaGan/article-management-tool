@@ -3,7 +3,7 @@ import { FolderList } from './components/FolderList';
 import { ArticleList } from './components/ArticleList';
 import { ArticleViewer } from './components/ArticleViewer';
 import { SettingsModal } from './components/SettingsModal';
-import { Settings, Minus, Square, X, CopyIcon, Cog } from 'lucide-react';
+import { Settings, Minus, Square, X, CopyIcon, Cog, CheckCircle } from 'lucide-react';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
 import { generateFileId } from '../../packages/utils';
@@ -31,6 +31,7 @@ function AppContent() {
   const { isSettingsOpen, setIsSettingsOpen } = useSettings();
   const [isMaximized, setIsMaximized] = useState(false);
   const [isBuilding, setIsBuilding] = useState(false);
+  const [message, setMessage] = useState<{show: boolean; text: string}>({ show: false, text: '' });
 
   // 处理文件拖放
   const { isDragging, dragHandlers } = useDragAndDrop({
@@ -82,14 +83,21 @@ function AppContent() {
     }
   };
 
+  const showMessage = (text: string) => {
+    setMessage({ show: true, text });
+    setTimeout(() => {
+      setMessage({ show: false, text: '' });
+    }, 1500);
+  };
+
   return (
     <div
-      className="h-screen flex flex-col"
+      className="flex flex-col h-screen"
       {...dragHandlers}
     >
       {/* 自定义标题栏 */}
       <div
-        className="h-8 flex items-center bg-gray-300 justify-between px-4 select-none"
+        className="flex justify-between items-center px-4 h-8 bg-gray-300 select-none"
         style={dragStyle}
         onDoubleClick={() => window.electron?.maximize()}
       >
@@ -97,13 +105,13 @@ function AppContent() {
         <div className="flex items-center space-x-2" style={noDragStyle}>
           <button
             onClick={() => window.electron?.minimize()}
-            className="p-1 hover:bg-gray-500 rounded"
+            className="p-1 rounded hover:bg-gray-500"
           >
             <Minus className="w-4 h-4 text-gray-700" />
           </button>
           <button
             onClick={() => window.electron?.maximize()}
-            className="p-1 hover:bg-gray-500 rounded"
+            className="p-1 rounded hover:bg-gray-500"
           >
             {isMaximized ? (
               <CopyIcon className="w-4 h-4 text-gray-700" />
@@ -113,7 +121,7 @@ function AppContent() {
           </button>
           <button
             onClick={() => window.electron?.close()}
-            className="p-1 hover:bg-red-500 rounded"
+            className="p-1 rounded hover:bg-red-500"
           >
             <X className="w-4 h-4 text-gray-700" />
           </button>
@@ -137,14 +145,14 @@ function AppContent() {
 
         <button
           onClick={() => setIsSettingsOpen(true)}
-          className="absolute bottom-4 left-4 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+          className="absolute bottom-4 left-4 p-2 bg-gray-100 rounded-lg transition-colors hover:bg-gray-200"
         >
           <Settings className="w-5 h-5 text-gray-700" />
         </button>
         <button
           onClick={handleBuild}
           disabled={isBuilding}
-          className="absolute bottom-4 left-14 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-50"
+          className="absolute bottom-4 left-14 p-2 bg-gray-100 rounded-lg transition-colors hover:bg-gray-200 disabled:opacity-50"
         >
           <Cog className={`w-5 h-5 text-gray-700 ${isBuilding ? 'animate-spin' : ''}`} />
         </button>
@@ -152,13 +160,27 @@ function AppContent() {
         <SettingsModal
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
+          onSuccess={() => {
+            setIsSettingsOpen(false)
+            showMessage('设置保存成功')
+          }}
         />
+
+        {/* 消息提示 */}
+        {message.show && (
+          <div className="fixed top-20 left-1/2 z-50 transform -translate-x-1/2">
+            <div className="flex gap-2 items-center p-4 rounded-lg shadow-lg backdrop-blur-sm bg-white/90">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span className="text-gray-800">{message.text}</span>
+            </div>
+          </div>
+        )}
 
         {/* 拖拽遮罩层 */}
         {isDragging && (
-          <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-              <div className="text-2xl font-bold text-gray-700 mb-2">
+          <div className="flex absolute inset-0 z-50 justify-center items-center bg-gray-900/50">
+            <div className="p-8 text-center bg-white rounded-lg shadow-lg">
+              <div className="mb-2 text-2xl font-bold text-gray-700">
                 松开以导入文件
               </div>
               <p className="text-gray-500">
@@ -170,8 +192,8 @@ function AppContent() {
 
         {/* 添加构建中的遮罩层 */}
         {isBuilding && (
-          <div className="absolute inset-0 bg-gray-900/30 flex items-center justify-center z-50">
-            <div className="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-2">
+          <div className="flex absolute inset-0 z-50 justify-center items-center bg-gray-900/30">
+            <div className="flex items-center p-4 space-x-2 bg-white rounded-lg shadow-lg">
               <Cog className="w-5 h-5 animate-spin" />
               <span>Building...</span>
             </div>

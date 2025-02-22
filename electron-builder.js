@@ -26,6 +26,20 @@ const config = {
       filter: [
         "**/*"
       ]
+    },
+    {
+      from: "package.json",
+      to: "package.json",
+      filter: [
+        "**/*"
+      ]
+    },
+    {
+      from: "scripts",
+      to: "scripts",
+      filter: [
+        "**/*"
+      ]
     }
   ],
   asar: true,

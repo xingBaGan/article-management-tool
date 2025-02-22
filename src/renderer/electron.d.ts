@@ -37,7 +37,8 @@ interface ElectronAPI {
   saveSettings: (settings: Settings) => Promise<void>
   initContentLayer: () => Promise<any>
   initRepo: (repoUrl: string) => Promise<any>
-  pushRepo: () => Promise<any>
+  pushRepo: (force?: boolean) => Promise<{ success: boolean; error?: any }>
+  getIsInitialed: () => Promise<any>
 }
 
 declare global {
