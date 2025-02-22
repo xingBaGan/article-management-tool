@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { X, GitBranch, Upload, RotateCw } from 'lucide-react';
+import { X, GitBranch, Upload, RotateCw, Download, RefreshCw } from 'lucide-react';
+import availableTemplates from '../../../templates/templates_avaliable.json';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+}
+
+interface Template {
+  name: string;
+  url: string;
 }
 
 export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps) {
@@ -14,6 +20,11 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
   const [isPushing, setIsPushing] = useState(false);
   const [isInitialed, setIsInitialed] = useState(false);
   const [forceSync, setForceSync] = useState(false);
+  const [templates, setTemplates] = useState<Template[]>(availableTemplates);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>();
+  const [isTemplateLoading, setIsTemplateLoading] = useState(false);
+  const [isTemplateUpdating, setIsTemplateUpdating] = useState(false);
+  const [isTemplateExists, setIsTemplateExists] = useState(false);
 
   useEffect(() => {
     window.electron?.getIsInitialed().then((isInitialed: any) => {
@@ -22,17 +33,29 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
   }, []);
 
   useEffect(() => {
-    // 加载已保存的设置
+    if (selectedTemplate) {
+      window.electron?.isTemplateExists(selectedTemplate).then((isExists: any) => {
+        setIsTemplateExists(isExists);
+      });
+    }
+  }, [selectedTemplate]);
+
+  useEffect(() => {
+    // Load saved settings
     window.electron?.getSettings().then((settings: any) => {
       setRepoUrl(settings.repoUrl || '');
+      setSelectedTemplate(settings.selectedTemplate || '');
     });
   }, []);
 
+
+  // 定义一个异步函数handleSave，用于保存设置
   const handleSave = async () => {
     try {
       setIsSaving(true);
       await window.electron?.saveSettings({
-        repoUrl
+        repoUrl,
+        selectedTemplate
       });
       onSuccess();
       setTimeout(() => {
@@ -73,6 +96,55 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
     }
   };
 
+  const handleInitializeTemplate = async () => {
+    try {
+      setIsTemplateLoading(true);
+      console.log('template', selectedTemplate);
+      const selectedTemplateData = templates.find(t => t.name === selectedTemplate);
+      if (!selectedTemplateData) {
+        window.electron?.log.error('Selected template not found');
+        return;
+      }
+      
+      const result = await window.electron.initializeBlogTemplate(
+        selectedTemplateData.name,
+        selectedTemplateData.url
+      );
+      
+      if (result.success) {
+        window.electron?.log.info(result.message);
+      } else {
+        window.electron?.log.error(result.message);
+      }
+    } catch (error) {
+      window.electron?.log.error('Failed to initialize template');
+    } finally {
+      setIsTemplateLoading(false);
+    }
+  };
+
+  const handleUpdateTemplate = async () => {
+    try {
+      setIsTemplateUpdating(true);
+      const selectedTemplateData = templates.find(t => t.name === selectedTemplate);
+      if (!selectedTemplateData) {
+        window.electron?.log.error('Selected template not found');
+        return;
+      }
+      
+      const result = await window.electron.updateBlogTemplate(selectedTemplateData.name);
+      if (result.success) {
+        window.electron?.log.info(result.message);
+      } else {
+        window.electron?.log.error(result.message);
+      }
+    } catch (error) {
+      window.electron?.log.error('Failed to update template');
+    } finally {
+      setIsTemplateUpdating(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -99,6 +171,57 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
             >
               <X className="w-5 h-5 text-gray-600" />
             </button>
+          </div>
+
+          <div className="mb-6 space-y-2">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-medium text-gray-900">Blog Template</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleInitializeTemplate}
+                  disabled={isTemplateExists || isTemplateLoading}
+                  className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Initialize Template"
+                >
+                  {isTemplateLoading ? (
+                    <div className="animate-spin">
+                      <RotateCw className="w-4 h-4" />
+                    </div>
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                </button>
+                <button
+                  onClick={handleUpdateTemplate}
+                  disabled={!isTemplateExists || isTemplateUpdating}
+                  className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Update Template"
+                >
+                  {isTemplateUpdating ? (
+                    <div className="animate-spin">
+                      <RotateCw className="w-4 h-4" />
+                    </div>
+                  ) : (
+                    <RefreshCw className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+            <select
+              value={selectedTemplate}
+              onChange={(e) => {
+                setSelectedTemplate(e.target.value);
+              }}
+              className="px-3 py-2 w-full text-sm rounded-md border border-gray-300"
+              aria-label="Select Blog Template"
+            >
+              <option value="">Select Blog Template</option>
+              {templates?.map((template) => (
+                <option key={template.name} value={template.name}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-2">
@@ -146,7 +269,7 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
               onChange={(e) => setForceSync(e.target.checked)}
             />
             <label htmlFor="forceSync" className="text-sm text-gray-600">
-              强制同步（谨慎使用，会覆盖远程仓库内容!!!）
+              Force Sync (Use with caution, will overwrite remote repository content!!!)
             </label>
           </div>
 

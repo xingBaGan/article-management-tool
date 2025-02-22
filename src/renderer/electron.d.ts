@@ -12,8 +12,7 @@ interface FileData {
 
 interface Settings {
   repoUrl?: string;
-  theme?: string;
-  // 其他设置属性
+  selectedTemplate?: string;
 }
 
 interface ElectronAPI {
@@ -39,6 +38,9 @@ interface ElectronAPI {
   initRepo: (repoUrl: string) => Promise<any>
   pushRepo: (force?: boolean) => Promise<{ success: boolean; error?: any }>
   getIsInitialed: () => Promise<any>
+  initializeBlogTemplate: (templateName: string, templateUrl: string) => Promise<{ success: boolean; message: string }>
+  updateBlogTemplate: (templateName: string) => Promise<{ success: boolean; message: string }>
+  isTemplateExists: (templateName: string) => Promise<boolean>
   log: {
     info: (message: string, meta?: any) => void;
     error: (message: string, meta?: any) => void;

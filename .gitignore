@@ -29,3 +29,11 @@ content
 
 # Electron-builder output
 dist_electron
+
+# 排除 templates 目录下的所有文件，但保留目录本身
+templates/*
+!templates/.gitkeep
+
+!templates/templates_avaliable.json
+
+.gitmodules

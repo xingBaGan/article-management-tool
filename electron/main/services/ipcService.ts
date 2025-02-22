@@ -7,6 +7,7 @@ import { getDocuments, buildContentLayer } from "./contentLayerService"
 import fs from "fs/promises"
 import { getIsInitialed, initRepo, pushRepo } from './gitService'
 import { logger } from './logService'
+import { TemplatesService } from './templatesService'
 
 function initIpcMain(mainWindow: BrowserWindow) {
   // 将 项目 data 下的书，拷贝到 userData  content目录下
@@ -184,6 +185,21 @@ function initIpcMain(mainWindow: BrowserWindow) {
         break;
     }
   });
+
+  const templatesService = new TemplatesService()
+
+  // 注册模板相关的处理程序
+  ipcMain.handle('template:initialize', async (_, templateName: string, templateUrl: string) => {
+    return await templatesService.initializeBlogTemplate(templateName, templateUrl)
+  })
+
+  ipcMain.handle('template:update', async (_, templateName: string) => {
+    return await templatesService.updateBlogTemplate(templateName)
+  })
+
+  ipcMain.handle('template:is-exists', async (_, templateName: string) => {
+    return await templatesService.isTemplateExists(templateName)
+  })
 }
 
 export default initIpcMain

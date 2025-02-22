@@ -3,7 +3,7 @@ import { Folder } from "../../packages/types"
 
 interface Settings {
   repoUrl?: string;
-  // 添加其他设置属性
+  selectedTemplate?: string;
 }
 
 // Add logging interface
@@ -36,7 +36,9 @@ const api = {
   initRepo: (repoUrl: string) => ipcRenderer.invoke('init-repo', repoUrl),
   pushRepo: (force: boolean = false) => ipcRenderer.invoke('push-repo', force),
   getIsInitialed: () => ipcRenderer.invoke('get-is-initialed'),
-  // Add logging methods
+  initializeBlogTemplate: (templateName: string, templateUrl: string) => ipcRenderer.invoke('template:initialize', templateName, templateUrl),
+  updateBlogTemplate: (templateName: string) => ipcRenderer.invoke('template:update', templateName),
+  isTemplateExists: (templateName: string) => ipcRenderer.invoke('template:is-exists', templateName),
   log: {
     info: (message: string, meta?: any) => 
       ipcRenderer.invoke('log', { level: 'info', message, meta }),

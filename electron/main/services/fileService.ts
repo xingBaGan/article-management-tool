@@ -162,7 +162,10 @@ export async function getSettings(): Promise<Record<string, any>> {
   } catch (error) {
     if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
       // File does not exist, create a new one with default settings
-      const defaultSettings = {};
+      const defaultSettings = {
+        repoUrl: '',
+        selectedTemplate: ''
+      };
       await fs.writeFile(settingsPath, JSON.stringify(defaultSettings, null, 2));
       return defaultSettings;
     } else {
