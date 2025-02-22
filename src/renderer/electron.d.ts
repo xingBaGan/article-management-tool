@@ -39,6 +39,12 @@ interface ElectronAPI {
   initRepo: (repoUrl: string) => Promise<any>
   pushRepo: (force?: boolean) => Promise<{ success: boolean; error?: any }>
   getIsInitialed: () => Promise<any>
+  log: {
+    info: (message: string, meta?: any) => void;
+    error: (message: string, meta?: any) => void;
+    warn: (message: string, meta?: any) => void;
+    debug: (message: string, meta?: any) => void;
+  }
 }
 
 declare global {

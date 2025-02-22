@@ -37,8 +37,10 @@ export async function readTextFiles(dirPath: string): Promise<FileInfo[]> {
             const id = await generateFileId(fullPath, entry.name)
             let newPath = join(app.getPath('userData'), 'content', entry.name)
             if (existsSync(newPath)) {
-              const newName = `${entry.name}${Date.now()}${ext}`
+              const name = entry.name.split('.')[0]
+              const newName = `${name}${Date.now()}${ext}`
               newPath = join(app.getPath('userData'), 'content', newName)
+              await copyFile(fullPath, newPath)
             }
             files.push({
               id,

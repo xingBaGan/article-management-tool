@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, GitBranch, Upload } from 'lucide-react';
+import { X, GitBranch, Upload, RotateCw } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -60,7 +60,12 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
   const handlePushRepo = async () => {
     try {
       setIsPushing(true);
-      await window.electron?.pushRepo(forceSync);
+      const res = await window.electron?.pushRepo(forceSync);
+      if (res.success) {
+        window.electron?.log.info('Push repository successfully');
+      } else {
+        window.electron?.log.error('Failed to push repository:', res.error);
+      }
     } catch (error) {
       console.error('Failed to push repository:', error);
     } finally {
@@ -90,6 +95,7 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
             <button
               onClick={onClose}
               className="p-1 rounded-full transition-colors hover:bg-black/5"
+              title="Close Settings"
             >
               <X className="w-5 h-5 text-gray-600" />
             </button>
@@ -109,11 +115,17 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
                 </button>
                 <button
                   onClick={handlePushRepo}
-                  disabled={isPushing || !repoUrl}
+                  disabled={isInitialed || isPushing || !repoUrl}
                   className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Push Changes"
                 >
-                  <Upload className="w-4 h-4" />
+                  {isPushing ? (
+                    <div className="animate-spin">
+                      <RotateCw className="w-4 h-4" />
+                    </div>
+                  ) : (
+                    <Upload className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
