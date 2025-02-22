@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, GitBranch, Upload, RotateCw, Download, RefreshCw } from 'lucide-react';
 import availableTemplates from '../../../templates/templates_avaliable.json';
+import { useLocale } from '../contexts/LanguageContext';
+import { LanguageSwitch } from './LanguageSwitch';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -14,6 +16,7 @@ interface Template {
 }
 
 export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps) {
+  const { t } = useLocale();
   const [repoUrl, setRepoUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
@@ -163,11 +166,14 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
         {/* Content */}
         <div className="relative p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
+            <div className="flex gap-4 items-center">
+              <h2 className="text-xl font-semibold text-gray-900">{t('settings.title')}</h2>
+              <LanguageSwitch />
+            </div>
             <button
               onClick={onClose}
               className="p-1 rounded-full transition-colors hover:bg-black/5"
-              title="Close Settings"
+              title={t('settings.close')}
             >
               <X className="w-5 h-5 text-gray-600" />
             </button>
@@ -175,13 +181,13 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
 
           <div className="mb-6 space-y-2">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-medium text-gray-900">Blog Template</h3>
+              <h3 className="text-sm font-medium text-gray-900">{t('settings.blogTemplate.title')}</h3>
               <div className="flex gap-2">
                 <button
                   onClick={handleInitializeTemplate}
                   disabled={isTemplateExists || isTemplateLoading}
                   className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Initialize Template"
+                  title={t('settings.blogTemplate.initialize')}
                 >
                   {isTemplateLoading ? (
                     <div className="animate-spin">
@@ -195,7 +201,7 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
                   onClick={handleUpdateTemplate}
                   disabled={!isTemplateExists || isTemplateUpdating}
                   className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Update Template"
+                  title={t('settings.blogTemplate.update')}
                 >
                   {isTemplateUpdating ? (
                     <div className="animate-spin">
@@ -213,9 +219,9 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
                 setSelectedTemplate(e.target.value);
               }}
               className="px-3 py-2 w-full text-sm rounded-md border border-gray-300"
-              aria-label="Select Blog Template"
+              aria-label={t('settings.blogTemplate.select')}
             >
-              <option value="">Select Blog Template</option>
+              <option value="">{t('settings.blogTemplate.select')}</option>
               {templates?.map((template) => (
                 <option key={template.name} value={template.name}>
                   {template.name}
@@ -226,21 +232,21 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-medium text-gray-900">Git Repository</h3>
+              <h3 className="text-sm font-medium text-gray-900">{t('settings.gitRepo.title')}</h3>
               <div className="flex gap-2">
                 <button
                   onClick={handleInitRepo}
                   disabled={isInitialed || isInitializing || !repoUrl}
                   className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Initialize Repository"
+                  title={t('settings.gitRepo.initialize')}
                 >
                   <GitBranch className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handlePushRepo}
-                  disabled={isInitialed || isPushing || !repoUrl}
+                  disabled={!isInitialed || isPushing || !repoUrl}
                   className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Push Changes"
+                  title={t('settings.gitRepo.push')}
                 >
                   {isPushing ? (
                     <div className="animate-spin">
@@ -254,7 +260,7 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
             </div>
             <input
               type="text"
-              placeholder="Enter repository URL"
+              placeholder={t('settings.gitRepo.placeholder')}
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
               className="px-3 py-2 w-full text-sm rounded-md border border-gray-300"
@@ -268,8 +274,8 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
               checked={forceSync}
               onChange={(e) => setForceSync(e.target.checked)}
             />
-            <label htmlFor="forceSync" className="text-sm text-gray-600">
-              Force Sync (Use with caution, will overwrite remote repository content!!!)
+            <label htmlFor="forceSync" className="flex-grow flex-shrink-0 w-full text-sm text-gray-600s">
+              {t('settings.forceSync.label')} {t('settings.forceSync.warning')}
             </label>
           </div>
 
@@ -279,7 +285,7 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
               disabled={isSaving}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isSaving ? t('settings.saving') : t('settings.save')}
             </button>
           </div>
         </div>

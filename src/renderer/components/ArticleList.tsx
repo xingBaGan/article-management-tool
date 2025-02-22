@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FileText, Trash2 } from 'lucide-react';
 import { ArticleInfo, Folder } from '../../../packages/types';
 import clsx from 'clsx';
+import { useLocale } from '../contexts/LanguageContext';
 
 interface ArticleListProps {
   folder: Folder | null;
@@ -10,6 +11,7 @@ interface ArticleListProps {
 }
 
 export function ArticleList({ folder, selectedArticle, onSelectArticle }: ArticleListProps) {
+  const { t } = useLocale();
   const [contextMenu, setContextMenu] = useState<{
     show: boolean;
     x: number;
@@ -58,17 +60,17 @@ export function ArticleList({ folder, selectedArticle, onSelectArticle }: Articl
   if (!folder) {
     return (
       <div className="h-full w-72 bg-white p-4 border-r border-gray-200 overflow-hidden" onClick={handleClick}>
-        <h2 className="text-lg font-semibold mb-4">Articles</h2>
-      <div className="h-full w-72 bg-white p-4 border-r border-gray-200 flex items-center justify-center text-gray-500 overflow-y-auto">
-        Select a folder to view articles
-      </div>
+        <h2 className="text-lg font-semibold mb-4">{t('articles.title')}</h2>
+        <div className="h-full w-72 bg-white p-4 border-r border-gray-200 flex items-center justify-center text-gray-500 overflow-y-auto">
+          {t('articles.select')}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="h-full w-72 bg-white p-4 border-r border-gray-200 overflow-y-auto" onClick={handleClick}>
-      <h2 className="text-lg font-semibold mb-4">Articles</h2>
+      <h2 className="text-lg font-semibold mb-4">{t('articles.title')}</h2>
       <div className="space-y-2">
         {articles.map((article) => (
           <button
@@ -105,7 +107,7 @@ export function ArticleList({ folder, selectedArticle, onSelectArticle }: Articl
             onClick={() => handleDelete(contextMenu.articleId)}
           >
             <Trash2 className="w-4 h-4" />
-            <span>删除文章</span>
+            <span>{t('articles.delete')}</span>
           </button>
         </div>
       )}

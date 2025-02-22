@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FolderIcon, Trash2 } from 'lucide-react';
 import { Folder, ArticleInfo } from '../../../packages/types';
 import clsx from 'clsx';
+import { useLocale } from '../contexts/LanguageContext';
 
 interface FolderListProps {
   folders: Folder[];
@@ -11,6 +12,7 @@ interface FolderListProps {
 }
 
 export function FolderList({ folders, selectedFolder, setSelectFolder, setSelectedArticle }: FolderListProps) {
+  const { t } = useLocale();
   const [contextMenu, setContextMenu] = useState<{
     show: boolean;
     x: number;
@@ -54,7 +56,7 @@ export function FolderList({ folders, selectedFolder, setSelectFolder, setSelect
 
   return (
     <div className="h-full w-64 bg-gray-100 p-4 border-r border-gray-200 overflow-y-auto" onClick={handleClick}>
-      <h2 className="text-lg font-semibold mb-4">Folders</h2>
+      <h2 className="text-lg font-semibold mb-4">{t('folders.title')}</h2>
       <div className="space-y-2">
         {folders.map((folder) => (
           <button
@@ -91,7 +93,7 @@ export function FolderList({ folders, selectedFolder, setSelectFolder, setSelect
             onClick={() => handleDelete(contextMenu.folderId)}
           >
             <Trash2 className="w-4 h-4" />
-            <span>删除文件夹</span>
+            <span>{t('folders.delete')}</span>
           </button>
         </div>
       )}

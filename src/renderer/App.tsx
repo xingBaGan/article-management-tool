@@ -5,6 +5,7 @@ import { ArticleViewer } from './components/ArticleViewer';
 import { SettingsModal } from './components/SettingsModal';
 import { Settings, Minus, Square, X, CopyIcon, Cog, CheckCircle } from 'lucide-react';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
 import { generateFileId } from '../../packages/utils';
 import { ArticleProvider, useArticle } from './contexts/ArticleContext';
@@ -208,7 +209,9 @@ export function App() {
   return (
     <ArticleProvider>
       <SettingsProvider>
-        <AppContent />
+        <LanguageProvider>
+          <AppContent />
+        </LanguageProvider>
       </SettingsProvider>
     </ArticleProvider>
   );

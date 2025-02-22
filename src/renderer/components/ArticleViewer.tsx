@@ -1,15 +1,19 @@
 import React from 'react';
 import { MDXLayoutRenderer } from 'pliny/src/mdx-components';
 import { ArticleInfo } from '../../../packages/types';
+import { useLocale } from '../contexts/LanguageContext';
+
 interface ArticleViewerProps {
   article: ArticleInfo | null;
 }
 
 export function ArticleViewer({ article }: ArticleViewerProps) {
+  const { t } = useLocale();
+
   if (!article) {
     return (
       <div className="h-full flex-1 p-4 flex items-center justify-center text-gray-500 overflow-y-auto">
-        Select an article to view its content
+        {t('viewer.select')}
       </div>
     );
   }
