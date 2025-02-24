@@ -1,7 +1,7 @@
 {
   "name": "article-management-tool",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "一个将本地markdown文件发布到各个平台的工具",
   "author": "jacob jiang",
   "main": "out/electron/main/index.js",
